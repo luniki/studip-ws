@@ -25,60 +25,117 @@
 class Studip_Ws_Struct {
 
   /**
+   * Holds the struct's fields.
+   *
+   * @access private
+   * @var array
+   */
+  var $struct_fields = array();
+
+
+	/**
+	 * <MethodDescription>
+	 *
+	 * @param string <description>
+	 * @param mixed <description>
+	 * @param array <description>
+	 *
+	 * @return void
+	 */
+	function add_element($name, $type, $options = array()) {
+
+    # name must not exist
+    $name = (string) $name;
+    if (isset($this->struct_fields[$name]))
+      trigger_error(sprintf('Element %s already defined.', $name),
+                    E_USER_ERROR);
+
+    # translate type description
+    $type = Studip_Ws_Api::translate_signature_entry($type);
+
+    # TODO options
+
+    $this->struct_fields[$name] =&
+      new Studip_Ws_StructElement($name, $type, $options);
+	}
+
+
+  /**
+   * <MethodDescription>
+   *
+   * @return array <description>
+   */
+  function &get_elements() {
+    return $this->struct_fields;
+  }
+
+  
+  /**
+   * <MethodDescription>
+   *
+   * @param string <description>
+   *
+   * @return bool <description>
+   */
+  function is_a_struct($class) {
+    
+    if (strcasecmp($class, __CLASS__))
+      return TRUE;
+    
+    if ($parent = get_parent_class($class))
+      return Studip_Ws_Api::is_a_struct($parent);
+    
+    return FALSE;
+  }
+}
+
+
+/**
+ * <ClassDescription>
+ *
+ * @package   <package>
+ * @package   <package>
+ *
+ * @author    mlunzena
+ * @copyright (c) Authors
+ * @version   $Id$
+ */
+class Studip_Ws_StructElement {
+
+  /**
    * <FieldDescription>
    *
    * @access private
    * @var <type>
    */
-  var $members;
-
+  var $name;
+  
   /**
-   * <MethodDescription>
+   * <FieldDescription>
    *
-   * @param type <description>
-   *
-   * @return type <description>
+   * @access private
+   * @var <type>
    */
-	function Studip_Ws_Struct() {
-	  $this->members = array();
-	}
-	
-	
+  var $type;
+  
+  /**
+   * <FieldDescription>
+   *
+   * @access private
+   * @var <type>
+   */
+  var $options;
+
 	/**
 	 * <MethodDescription>
 	 *
 	 * @param type <description>
-	 * @param type <description>
-	 * @param type <description>
 	 *
 	 * @return type <description>
 	 */
-	function add_member($name, $type, $options = NULL) {
-    $member = array();
-    $member['type'] = Studip_Ws_Api::translate_signature_entry($type);
-    $member['options'] = $options;
-    Studip_Ws_Struct::members($name, $member);
+	function Studip_Ws_StructElement($name, $type, $options = array()) {
+	  $this->name = (string) $name;
+	  $this->type = $type;
+	  $this->options = $options;
 	}
-
-  function members($key = NULL, $value = NULL) {
-    static $members;
-    
-    if (is_null($members))
-      $members = array();
-    
-    if (!is_null($key))
-      $members[$key] = $value;
-
-    return $members;
-  }
-
-  /**
-   * <MethodDescription>
-   *
-   * @param type <description>
-   *
-   * @return type <description>
-   */
-  function init() {
-  }
 }

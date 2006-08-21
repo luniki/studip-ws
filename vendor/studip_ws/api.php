@@ -60,10 +60,24 @@ class Studip_Ws_Api {
       }
 
     # structs
-    if (class_exists($type) && Studip_Ws_Api::is_a_struct($type)) {
-      $members = array();
-      UserStruct::init();
-      var_dump(Studip@@@TODO@@@::members());
+#     static $structs;
+#     if (is_null($structs))
+#       $structs = array();
+
+    if (class_exists($type) && Studip_Ws_Struct::is_a_struct($type)) {
+#       $members = array();
+#       UserStruct::init();
+#       var_dump(Studip@@@TODO@@@::members());
+
+#       if (!isset($structs[strtolower($type)])) {
+#         $structs[strtolower($type)] = TRUE;
+#         var_dump($structs);
+#         
+#       }
+        $type_instance =& new $type();
+        var_dump($type_instance->get_elements());
+      
+      
       return "hallo";
 
       foreach (call_user_func(array($type,'members')) as $n => $t)
@@ -88,23 +102,5 @@ class Studip_Ws_Api {
         return $replacement;
     
     trigger_error('"' . var_export($type, TRUE) . '" is not a valid type.');
-  }
-  
-  /**
-   * <MethodDescription>
-   *
-   * @param string <description>
-   *
-   * @return bool <description>
-   */
-  function is_a_struct($class) {
-    
-    if (strcasecmp($class, 'Studip_Ws_Struct'))
-      return TRUE;
-    
-    if ($parent = get_parent_class($class))
-      return Studip_Ws_Api::is_a_struct($parent);
-    
-    return FALSE;
   }
 }

@@ -23,14 +23,16 @@ require_once 'vendor/studip_ws/struct.php';
  * @version   $Id$
  */
 class UserStruct extends Studip_Ws_Struct {
-  function init() {
-    UserStruct::add_member('name', 'string');
-    UserStruct::add_member('id',   1);
-    UserStruct::add_member('next', 'string');
-    var_dump(UserStruct::members());
-    
+
+  var $name, $id, $mentor;
+
+  function UserStruct() {
+    $this->add_element('name', 'string');
+    $this->add_element('id',   1);
+    #$this->add_element('mentor', __CLASS__);
   }
 }
+
 
 class ApiTestCase extends UnitTestCase {
 
