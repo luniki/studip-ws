@@ -79,11 +79,20 @@ class Studip_Ws_Struct {
    */
   function is_a_struct($class) {
     
-    if (strcasecmp($class, __CLASS__))
+    if (!is_string($class)) {
+      if (is_object($class)) {
+        $class = get_class($class);
+      } else {
+        trigger_error('Argument has to be a string or an object.',
+                      E_USER_ERROR);
+      }
+    }
+      
+    if (strcasecmp($class, __CLASS__) === 0)
       return TRUE;
-    
+
     if ($parent = get_parent_class($class))
-      return Studip_Ws_Api::is_a_struct($parent);
+      return Studip_Ws_Struct::is_a_struct($parent);
     
     return FALSE;
   }

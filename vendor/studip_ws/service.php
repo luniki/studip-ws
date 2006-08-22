@@ -76,37 +76,74 @@ class Studip_Ws_Service {
    *
    * @param string <description>
    * @param array  <description>
+   * @param mixed  <description>
    * @param string <description>
    *
    * @return void
    */
-  function add_api_method($name, $options, $description = '') {
+  function add_api_method($name, $arguments = NULL, $returns = NULL,
+                          $description = NULL) {
 
-    $description = (string) $description;
-
-    if (!is_array($options)) $options = array();
-
-    # if 'expects' is omitted, this method has no arguments
-    if (!isset($options['expects']))
-      $options['expects'] = array();
-
-    if (!is_array($options['expects']))
-      trigger_error('$options[\'expects\'] is expected to be an array.',
+    # check $name
+# TODO
+#    if (!method_exists($this, $name . '_action'))
+#      trigger_error(sprintf('No such method exists: %s.', $name), E_USER_ERROR);
+    if (isset($this->api_methods[$name]))
+      trigger_error(sprintf('Method %s already added.', $name), E_USER_ERROR);
+    
+    # check $arguments
+    if (is_null($arguments))
+      $arguments = array();
+    else if (!is_array($arguments))
+      trigger_error('Second argument is expected to be an array.',
                     E_USER_ERROR);
 
+    # check $description
+    $description = (string) $description;
+
     $expects = array();
-    foreach ($options['expects'] as $entry) {
+    foreach ($arguments as $entry) {
       $expects[] = Studip_Ws_Api::translate_signature_entry($entry);
     }
     
+    $returns = Studip_Ws_Api::translate_signature_entry($returns);
     
-    # if 'returns' is omitted, this method has no return value
-    if (!isset($options['returns']))
-      $options['returns'] = NULL;
-    
-    $returns = Studip_Ws_Api::translate_signature_entry($options['returns']);
-
-    
-    $this->api_methods[$name] = compact('expects', 'returns', 'description');
+    return $this->api_methods[$name] =
+      compact('expects', 'returns', 'description');
+  }
+  
+  
+  /**
+   * <MethodDescription>
+   *
+   * @return array <description>
+   */
+  function &get_api_methods() {
+    return $this->api_methods;
+  }
+  
+  
+  /**
+   * <MethodDescription>
+   *
+   * @param type <description>
+   *
+   * @return type <description>
+   */
+  function &get_api_method($name) {
+    if (!isset($this->api_methods[$name])) {
+      $null_by_reference = NULL; return $null_by_reference;
+    }
+      
+    return $this->api_methods[$name];
+  }
+  
+  /**
+   * <MethodDescription>
+   *
+   * @return void
+   */
+  function clear_api_methods() {
+    $this->api_methods = array();
   }
 }

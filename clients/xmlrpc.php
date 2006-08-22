@@ -13,7 +13,7 @@
 
 require_once '../vendor/phpxmlrpc/xmlrpc.inc';
 
-define('XMLRPC_ENDPOINT', 'http://localhost/~mlunzena/studip_ws_example/public/xmlrpc.php');
+define('XMLRPC_ENDPOINT', 'http://pomona.virtuos.uos.de/~mlunzena/studip_ws/public/xmlrpc.php');
 $client =& new xmlrpc_client(XMLRPC_ENDPOINT);
 $client->return_type = 'phpvals';
 

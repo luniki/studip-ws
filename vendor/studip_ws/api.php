@@ -11,6 +11,15 @@
  * the License, or (at your option) any later version.
  */
 
+define('STUDIP_WS_TYPE_INT',    'int');
+define('STUDIP_WS_TYPE_STRING', 'string');
+define('STUDIP_WS_TYPE_BASE64', 'base64');
+define('STUDIP_WS_TYPE_BOOL',   'bool');
+define('STUDIP_WS_TYPE_FLOAT',  'float');
+define('STUDIP_WS_TYPE_ARRAY',  'array');
+define('STUDIP_WS_TYPE_STRUCT', 'struct');
+define('STUDIP_WS_TYPE_NULL',   'null');
+
 /**
  * <ClassDescription>
  *
@@ -24,78 +33,59 @@
 class Studip_Ws_Api {
   
   function translate_signature_entry($type) {
+
+    # complex types
+    if (is_string($type) &&
+        class_exists($type) &&
+        Studip_Ws_Struct::is_a_struct($type))
+      
+      return array(STUDIP_WS_TYPE_STRUCT => $type);
     
-    # array
+    # array types
     if (is_array($type)) {
       if (!sizeof($type))
         trigger_error('Array of unknown type.', E_USER_ERROR);
       if (is_null($array_type = current($type)))
         trigger_error('Array of unknown type.', E_USER_ERROR);
          
-      return array(Studip_Ws_Api::translate_signature_entry($array_type));
+      return array(STUDIP_WS_TYPE_ARRAY =>
+                   Studip_Ws_Api::translate_signature_entry($array_type));
     }
 
-    # literal type
+    # basic types
     if (is_string($type))
       switch ($type) {
       
         case 'int':
         case 'integer':
-                        return 'int';
+                        return STUDIP_WS_TYPE_INT;
 
         case 'string':
         case 'text':
-                        return 'string';
+                        return STUDIP_WS_TYPE_STRING;
 
         case 'base64':
-                        return 'base64';
+                        return STUDIP_WS_TYPE_BASE64;
 
         case 'bool':
         case 'boolean':
-                        return 'bool';
+                        return STUDIP_WS_TYPE_BOOL;
 
         case 'float':
         case 'double':
-                        return 'float';
+                        return STUDIP_WS_TYPE_FLOAT;
+
+        case 'null':
+                        return STUDIP_WS_TYPE_NULL;
       }
 
-    # structs
-#     static $structs;
-#     if (is_null($structs))
-#       $structs = array();
-
-    if (class_exists($type) && Studip_Ws_Struct::is_a_struct($type)) {
-#       $members = array();
-#       UserStruct::init();
-#       var_dump(Studip@@@TODO@@@::members());
-
-#       if (!isset($structs[strtolower($type)])) {
-#         $structs[strtolower($type)] = TRUE;
-#         var_dump($structs);
-#         
-#       }
-        $type_instance =& new $type();
-        var_dump($type_instance->get_elements());
-      
-      
-      return "hallo";
-
-      foreach (call_user_func(array($type,'members')) as $n => $t)
-        if ($t)
-          $members[] = sprintf('%s:%s;',
-                               Studip_Ws_Api::translate_signature_entry($t['type']),
-                               $n);
-      return sprintf('struct %s {%s};', $type, implode(' ', $members));
-    }
-
-    # by example
+    # type by example
     $type_checkers = array(
-      'is_bool'   => 'bool',
-      'is_float'  => 'float',
-      'is_int'    => 'int',
-      'is_string' => 'string',
-      'is_null'   => 'null',
-      # 'is_object' => '???',
+      'is_bool'   => STUDIP_WS_TYPE_BOOL,
+      'is_float'  => STUDIP_WS_TYPE_FLOAT,
+      'is_int'    => STUDIP_WS_TYPE_INT,
+      'is_string' => STUDIP_WS_TYPE_STRING,
+      'is_null'   => STUDIP_WS_TYPE_NULL,
       );
     foreach ($type_checkers as $function => $replacement)
       if ($function($type))

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * studip_ws.php - <short-description>
+ * user_struct.php - Test structure.
  *
  * Copyright (C) 2006 - Marcus Lunzenauer <mlunzena@uos.de>
  *
@@ -11,8 +11,13 @@
  * the License, or (at your option) any later version.
  */
 
-require_once 'api.php';
-require_once 'dispatcher.php';
-require_once 'fault.php';
-require_once 'service.php';
-require_once 'struct.php';
+class UserStruct extends Studip_Ws_Struct {
+
+  var $name, $id, $mentor;
+
+  function UserStruct() {
+    $this->add_element('name', 'string');
+    $this->add_element('id',   1);
+    $this->add_element('mentor', __CLASS__);
+  }
+}

@@ -22,7 +22,7 @@
  * @copyright (c) Authors
  * @version   $Id$
  */
-class Studip_Ws_XmlrpcDispatcher {
+class Studip_Ws_XmlrpcDispatcher extends Studip_Ws_Dispatcher {
   /**
    * An array of services that are known to the delegate.
    *
@@ -55,20 +55,6 @@ class Studip_Ws_XmlrpcDispatcher {
         $this->services[] = $service;
   }
   
-
-  /**
-   * <MethodDescription>
-   *
-   * @param type <description>
-   *
-   * @return type <description>
-   */
-  function is_a_service($class) {
-    if (strcasecmp($class, 'Studip_Ws_Service')) return TRUE;
-    if (!$class) return FALSE;
-    return Studip_Ws_XmlrpcDispatcher::is_a_service(get_parent_class($class));
-  }
-
 
   /**
    * <MethodDescription>
@@ -157,74 +143,103 @@ class Studip_Ws_XmlrpcDispatcher {
     return $map;
   }
   
-  function api_to_xmlrpc($api) {
-
-    $dispatch_map = array();
+  /**
+   * <MethodDescription>
+   *
+   * @param mixed <description>
+   *
+   * @return array <description>
+   */
+  function map_service(&$service) {
+  
+    $mapping = array();
     
     # iterate over api
-    foreach ($api as $name => $options) {
-
-      # validate options
-      if (!isset($options['returns']))
-        $options['returns'] = 'bool';
-
-
-      $tmp = array();
-
-      # get return type
-      $signature = array();
-      if (isset($options['returns']) && sizeof($options['returns']))
-        $signature[] = $this->type_to_xmlrpc_def($options['returns']);
-      else
-        $signature[] = $GLOBALS['xmlrpcBoolean'];
-      
-      # get arguments
-      if (isset($options['expects']) && sizeof($options['expects']))
-        foreach ($options['expects'] as $type)
-          $signature[] = $this->type_to_xmlrpc_def($type);
-      
-      $tmp['signature'] = array($signature);
-      $tmp['function']  = array(&$this, 'dispatch');
-      $tmp['docstring'] = isset($options['doc']) ? $options['doc'] : '';
-
-      $dispatch_map[$name] = $tmp;
+    foreach ($service->get_api_methods() as $name => $method) {
+      $mapping[$name] = $this->map_service_method($method); 
     }
     
-    return $dispatch_map;
+    return $mapping;  
   }
 
-  function type_to_xmlrpc_def($type) {
+  /**
+   * <MethodDescription>
+   *
+   * @param type <description>
+   *
+   * @return type <description>
+   */
+  function map_service_method($method) {
 
-    # type: struct
-#     if (FALSE)
-#       trigger_error('not implemented yet.', E_USER_ERROR);
-
-    # type: array
-    if (is_array($type) || 'array' === $type)
-      return $GLOBALS['xmlrpcArray'];
-
-    # type: boolean
-    if (is_bool($type) || preg_match('/(bool|boolean)/', $type))
-      return $GLOBALS['xmlrpcBoolean'];
-    
-    # type: float
-    if (is_float($type) || preg_match('/^(float|double)/', $type))
-      return $GLOBALS['xmlrpcDouble'];
-    
-    # type: int
-    if (is_int($type) || preg_match('/^(int|integer)$/', $type))
-      return $GLOBALS['xmlrpcInt'];
+    # TODO validate method
 
 
-    # type: base64
-    if ('base64' === $type)
-      return $GLOBALS['xmlrpcBase64'];
+    ## 1. function
+    $function = array(&$this, 'dispatch');
 
-    # type: string
+    ## 2. signature
+    $signature = array();
+
+    # return value
+    $signature[] = $this->translate_type($method['returns']);
+
+    # arguments
+    foreach ($method['expects'] as $type)
+      $signature[] = $this->translate_type($type);
+
+    ## 3. docstring
+    $docstring = $method['description'];
+
+    return compact('function', 'signature', 'docstring');
+  }
+
+
+  /**
+   * <MethodDescription>
+   *
+   * @param type <description>
+   *
+   * @return type <description>
+   */
+  function translate_type($type) {
+
+    # primitive types
     if (is_string($type))
-      return $GLOBALS['xmlrpcString'];
 
+      switch ($type) {
+        case STUDIP_WS_TYPE_INT:
+                                   return $GLOBALS['xmlrpcInt'];
 
-    trigger_error(sprintf('Type %s could not be found.', $type), E_USER_ERROR);
+        case STUDIP_WS_TYPE_STRING:
+                                   return $GLOBALS['xmlrpcString'];
+
+        case STUDIP_WS_TYPE_BASE64:
+                                   return $GLOBALS['xmlrpcBase64'];
+
+        case STUDIP_WS_TYPE_BOOL:
+                                   return $GLOBALS['xmlrpcBoolean'];
+
+        case STUDIP_WS_TYPE_FLOAT:
+                                   return $GLOBALS['xmlrpcDouble'];
+
+        case STUDIP_WS_TYPE_NULL:
+                                   return $GLOBALS['xmlrpcBoolean'];
+      }
+    
+    # complex types
+    if (is_array($type))
+    
+      switch (key($type)) {
+
+        case STUDIP_WS_TYPE_ARRAY:
+                                   return $GLOBALS['xmlrpcArray'];
+
+        case STUDIP_WS_TYPE_STRUCT:
+                                   return $GLOBALS['xmlrpcStruct'];
+      }
+
+    trigger_error(sprintf('Type %s could not be found.', 
+                          var_export($type, TRUE)),
+                  E_USER_ERROR);
   }
 }

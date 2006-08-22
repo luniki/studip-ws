@@ -12,7 +12,7 @@
 
 require_once '../vendor/nusoap/nusoap.php';
 
-define('WSDL_URL', 'http://localhost/~mlunzena/studip_ws_example/public/soap.php?wsdl');
+define('WSDL_URL', 'http://pomona.virtuos.uos.de/~mlunzena/studip_ws/public/soap.php?wsdl');
 $client =& new soap_client(WSDL_URL, TRUE);
 $proxy = $client->getProxy();
 

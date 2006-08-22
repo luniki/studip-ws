@@ -1,7 +1,7 @@
 <?php
 
 /*
- * studip_ws.php - <short-description>
+ * foo_service.php - Testing Services
  *
  * Copyright (C) 2006 - Marcus Lunzenauer <mlunzena@uos.de>
  *
@@ -11,8 +11,6 @@
  * the License, or (at your option) any later version.
  */
 
-require_once 'api.php';
-require_once 'dispatcher.php';
-require_once 'fault.php';
-require_once 'service.php';
-require_once 'struct.php';
+
+class FooService extends Studip_Ws_Service {
+}
