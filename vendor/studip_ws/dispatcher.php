@@ -22,17 +22,73 @@
  * @version   $Id$
  */
 class Studip_Ws_Dispatcher {
+
 	
-	/**
-	 * <MethodDescription>
-	 *
-	 * @param type <description>
-	 *
-	 * @return type <description>
-	 */
-	function Studip_Ws_Dispatcher() {
-	  # code...
-	}
+  /**
+   * An array of services that are known to the delegate.
+   *
+   * @access private
+   * @var array
+   */
+  var $services = array();
+
+
+  /**
+   * Constructor. Give an unlimited number of services' class names as
+   * arguments.
+   *
+   * @param string $services,... an unlimited number of services' class names
+   *
+   * @return void
+   */
+  function Studip_Ws_Dispatcher($services/*, ... */) {
+    foreach (func_get_args() as $service)
+      if (class_exists($service) && $this->is_a_service($service))
+        $this->services[] =& new $service();
+  }
+
+
+  /**
+   * <MethodDescription>
+   *
+   * @param type <description>
+   * @param type <description>
+   *
+   * @return type <description>
+   */
+  function &dispatch($method0, $argument_array) {
+    
+    $method = Studip_Ws_Dispatcher::map_function($method0);
+
+    # find service that provides $method
+    $service = NULL;
+    foreach ($this->services as $a_service)
+      if (method_exists($a_service, $method)) {
+        $service = $a_service;
+        break;
+      }
+    if (is_null($service))
+      return $this->throw_exception('No service responds to "%s".', $method0);
+
+
+    # calling before filter
+    $before = $service->before_filter($method, $argument_array);
+
+    # #### TODO ####
+    if ($before === FALSE)
+      return $this->throw_exception('TODO: before_filter');
+    else if (is_a($before, 'Studip_Ws_Fault'))
+      return $this->throw_exception($before->get_message());
+
+    # call actual function
+    $result =& call_user_func_array(array(&$service, $method), $argument_array);
+    
+    # calling after filter
+    $service->after_filter($method, $argument_array, $result);
+
+    return $result; 
+  }
+
 
   /**
    * <MethodDescription>
@@ -59,5 +115,17 @@ class Studip_Ws_Dispatcher {
       return Studip_Ws_Dispatcher::is_a_service($parent);
     
     return FALSE;
+  }
+
+
+  /**
+   * <MethodDescription>
+   *
+   * @param type <description>
+   *
+   * @return type <description>
+   */
+  function map_function($function) {
+    return $function . '_action';
   }
 }

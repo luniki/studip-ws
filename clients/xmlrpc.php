@@ -17,7 +17,7 @@ define('XMLRPC_ENDPOINT', 'http://pomona.virtuos.uos.de/~mlunzena/studip_ws/publ
 $client =& new xmlrpc_client(XMLRPC_ENDPOINT);
 $client->return_type = 'phpvals';
 
-$message =& new xmlrpcmsg('textgenerationwebservice.generate_text',
+$message =& new xmlrpcmsg('generate_text',
                           array(php_xmlrpc_encode('secret'),
                                 php_xmlrpc_encode(5)));
 $result = $client->send($message);

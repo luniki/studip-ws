@@ -27,21 +27,8 @@ require_once 'markov_chainer.php';
  */
 class TextGenerationWebService extends Studip_Ws_Service {
 
-  # returns this service's api
-  function get_api() {
-    $api = array();
-
-    $api['generate_text'] = array(
-      'expects' => array('string', 'int'),
-      'returns' => array('string'));
-    
-    return $api;
-  }
-  
   function TextGenerationWebService () {
-    $this->add_api_method('generate_text',
-                          array('expects' => array('string', 'int'),
-                                'returns' => array('string')),
+    $this->add_api_method('generate_text', array('string', 'int'), 'string',
                           'Generates text using Markov chains.');
   }
   

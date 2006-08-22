@@ -54,7 +54,7 @@ class Studip_Ws_Service {
    * @return mixed if this method returns a "TODO_fault" or "FALSE", further
    *               processing will be aborted and a "TODO_fault" delivered.
    */
-  function before_filter($name, &$args) {
+  function before_filter(&$name, &$args) {
   }
 
 
@@ -67,7 +67,7 @@ class Studip_Ws_Service {
    *
    * @return void
    */
-  function after_filter($name, &$args, &$result) {
+  function after_filter(&$name, &$args, &$result) {
   }
 
   

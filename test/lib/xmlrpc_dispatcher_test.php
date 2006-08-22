@@ -45,10 +45,10 @@ class XmlrpcDispatcherTestCase extends UnitTestCase {
   function assertArgument(&$sig, $expected_type) {
 
     # removing return value from front
-    $return_value = array_shift($sig['signature']);
+    $return_value = array_shift($sig['signature'][0]);
 
     # any arguments left?
-    if (sizeof($sig['signature']) === 0) {
+    if (sizeof($sig['signature'][0]) === 0) {
       if (is_null($expected_type))
         $this->pass();
       else
@@ -57,7 +57,7 @@ class XmlrpcDispatcherTestCase extends UnitTestCase {
     }
     
     # remove first argument
-    $actual_type = array_shift($sig['signature']);
+    $actual_type = array_shift($sig['signature'][0]);
 
     $msg = sprintf('Types do not match. Actual: "%s" Expected: "%s"',
                    var_export($actual_type, TRUE),
@@ -65,7 +65,7 @@ class XmlrpcDispatcherTestCase extends UnitTestCase {
     $this->assertEqual($actual_type, $expected_type, $msg);
 
     # put return value back
-    array_unshift($sig['signature'], $return_value);
+    array_unshift($sig['signature'][0], $return_value);
   }
 
   function assertDescription(&$sig, $expected_description) {
@@ -78,10 +78,10 @@ class XmlrpcDispatcherTestCase extends UnitTestCase {
   
   function assertReturnValue(&$sig, $expected_return_value) {
     
-    if (!isset($sig['signature'][0]))
+    if (!isset($sig['signature'][0][0]))
       $this->fail('Missing return value.');
 
-    $actual_return_value = $sig['signature'][0];
+    $actual_return_value = $sig['signature'][0][0];
     $msg = sprintf('Types do not match. Actual: "%s" Expected: "%s"',
                    var_export($actual_return_value, TRUE),
                    var_export($expected_return_value, TRUE));
