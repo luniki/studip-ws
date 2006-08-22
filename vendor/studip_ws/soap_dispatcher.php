@@ -45,48 +45,7 @@ class Studip_Ws_SoapDispatcher extends Studip_Ws_Dispatcher
     return FALSE;
   }
   
-
-  /**
-   * <MethodDescription>
-   *
-   * @param type <description>
-   *
-   * @return type <description>
-   */
-  function invoke($function, $argument_array) {
-
-    $function = Studip_Ws_Dispatcher::map_function($function);
-
-    # iterate all services
-    foreach ($this->services as $service) {
-
-      # found service that provides $function
-      if (in_array($function, get_class_methods($service))) {
-      
-        $service =& new $service();
-      
-        # calling before filter
-        $before = $service->before_filter($function, $argument_array);
-        # #### TODO ####
-        if ($before === FALSE)
-          return $this->throw_exception('TODO: before_filter');
-        else if (is_a($before, 'Studip_Ws_Fault'))
-          return $this->throw_exception($before->get_message());
-
-        # call actual function
-        $result =& call_user_func_array(array(&$service, $function), $argument_array);
-        
-        # calling after filter
-        $service->after_filter($function, $argument_array, $result);
-        
-        return $result;
-      }
-    }
-
-    return new soap_fault('Server', '', 'Could not find function.');
-  }
-
-
+  
   /**
    * <MethodDescription>
    *

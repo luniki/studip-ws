@@ -32,7 +32,7 @@ class Studip_Ws_XmlrpcDispatcher extends Studip_Ws_Dispatcher {
    *
    * @return type <description>
    */
-  function invoke($msg = NULL) {
+  function dispatch($msg = NULL) {
     
     # ensure correct invocation
     if (is_null($msg) || !is_a($msg, 'xmlrpcmsg'))
@@ -47,7 +47,7 @@ class Studip_Ws_XmlrpcDispatcher extends Studip_Ws_Dispatcher {
 
     # return result
     return new xmlrpcresp(
-      php_xmlrpc_encode($this->dispatch($msg->method(), $argument_array))); 
+      php_xmlrpc_encode($this->invoke($msg->method(), $argument_array))); 
   }
   
 
@@ -117,7 +117,7 @@ class Studip_Ws_XmlrpcDispatcher extends Studip_Ws_Dispatcher {
 
 
     ## 1. function
-    $function = array(&$this, 'invoke');
+    $function = array(&$this, 'dispatch');
 
     ## 2. signature
     $signature = array(array());

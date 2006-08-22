@@ -56,7 +56,7 @@ class Studip_Ws_Dispatcher {
    *
    * @return type <description>
    */
-  function &dispatch($method0, $argument_array) {
+  function &invoke($method0, $argument_array) {
     
     $method = Studip_Ws_Dispatcher::map_function($method0);
 
