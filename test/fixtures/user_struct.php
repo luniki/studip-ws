@@ -18,6 +18,7 @@ class UserStruct extends Studip_Ws_Struct {
   function UserStruct() {
     $this->add_element('name', 'string');
     $this->add_element('id',   1);
-    $this->add_element('mentor', __CLASS__);
+    $this->add_element('mentor', 'UserStruct');
+    $this->add_element('mentors', array('int'));
   }
 }

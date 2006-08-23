@@ -134,4 +134,9 @@ class DelegatingSoapServer extends soap_server {
     $this->debug("in invoke_method, received $this->methodreturn of type " .
                  gettype($this->methodreturn));
   }
+
+  
+  function registerServices() {
+    return $this->delegate->register_services($this);
+  }
 }

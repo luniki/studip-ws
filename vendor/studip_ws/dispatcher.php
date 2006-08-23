@@ -25,13 +25,13 @@ class Studip_Ws_Dispatcher {
 
 	
   /**
-   * An array of services that are known to the delegate.
+   * <FieldDescription>
    *
    * @access private
-   * @var array
+   * @var <type>
    */
-  var $services = array();
-
+  var $api_methods = array();
+  
 
   /**
    * Constructor. Give an unlimited number of services' class names as
@@ -42,37 +42,62 @@ class Studip_Ws_Dispatcher {
    * @return void
    */
   function Studip_Ws_Dispatcher($services/*, ... */) {
-    foreach (func_get_args() as $service)
-      if (class_exists($service) && $this->is_a_service($service))
-        $this->services[] =& new $service();
+    
+    foreach (func_get_args() as $service_name) {
+      
+      # not a service
+      if (!class_exists($service_name) || !$this->is_a_service($service_name))
+        continue;
+
+      $service =& new $service_name();
+
+      $api_methods = $service->get_api_methods();
+
+      foreach ($api_methods as $method_name => $method) {
+        
+        if (isset($this->api_methods[$method_name]))
+          trigger_error(sprintf('Method %s already defined', $method_name),
+                        E_USER_ERROR);
+
+        $this->api_methods[$method_name] =& $api_methods[$method_name];
+      }
+    }
   }
 
 
   /**
-   * <MethodDescription>
+   * This method is called to verify the existence of a mapped function.
    *
-   * @param type <description>
-   * @param type <description>
+   * @param string  the function's name
    *
-   * @return type <description>
+   * @return boolean returns TRUE, if the dispatcher can invoke the given
+   *                 function, FALSE otherwise
+   */
+  function responds_to($function) {
+    return isset($this->api_methods[$function]);
+  }
+
+
+  /**
+   * This method is responsible to call the given function with the given
+   * arguments.
+   *
+   * @param string the name of the function to invoke
+   * @param array an array of arguments
+   *
+   * @return mixed the return value of the invoked function
    */
   function &invoke($method0, $argument_array) {
-    
-    $method = Studip_Ws_Dispatcher::map_function($method0);
 
     # find service that provides $method
-    $service = NULL;
-    foreach ($this->services as $a_service)
-      if (method_exists($a_service, $method)) {
-        $service = $a_service;
-        break;
-      }
-    if (is_null($service))
+    if (!isset($this->api_methods[$method0]))
       return $this->throw_exception('No service responds to "%s".', $method0);
-
+      
+    $service = $this->api_methods[$method0]->service;
+    $method = Studip_Ws_Dispatcher::map_function($method0);
 
     # calling before filter
-    $before = $service->before_filter($method, $argument_array);
+    $before = $service->before_filter($method0, $argument_array);
 
     # #### TODO ####
     if ($before === FALSE)
@@ -84,7 +109,7 @@ class Studip_Ws_Dispatcher {
     $result =& call_user_func_array(array(&$service, $method), $argument_array);
     
     # calling after filter
-    $service->after_filter($method, $argument_array, $result);
+    $service->after_filter($method0, $argument_array, $result);
 
     return $result; 
   }

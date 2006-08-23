@@ -72,38 +72,13 @@ class Studip_Ws_XmlrpcDispatcher extends Studip_Ws_Dispatcher {
    *
    */
   function get_dispatch_map() {
-
-    $map = array();
-    
-    # iterate all services
-    foreach ($this->services as $service) {
-      $map += $this->map_service($service);
-    }
-    
-    return $map;
+    $dispatch_map = array();
+    foreach ($this->api_methods as $method_name => $method)
+      $dispatch_map[$method_name] = $this->map_method($method);
+    return $dispatch_map;
   }
   
   
-  /**
-   * <MethodDescription>
-   *
-   * @param mixed <description>
-   *
-   * @return array <description>
-   */
-  function map_service(&$service) {
-  
-    $mapping = array();
-    
-    # iterate over api
-    foreach ($service->get_api_methods() as $name => $method) {
-      $mapping[$name] = $this->map_service_method($method);
-    }
-    
-    return $mapping;  
-  }
-
-
   /**
    * <MethodDescription>
    *
@@ -111,10 +86,9 @@ class Studip_Ws_XmlrpcDispatcher extends Studip_Ws_Dispatcher {
    *
    * @return type <description>
    */
-  function map_service_method($method) {
+  function map_method($method) {
 
     # TODO validate method
-
 
     ## 1. function
     $function = array(&$this, 'dispatch');
@@ -123,14 +97,14 @@ class Studip_Ws_XmlrpcDispatcher extends Studip_Ws_Dispatcher {
     $signature = array(array());
 
     # return value
-    $signature[0][] = $this->translate_type($method['returns']);
+    $signature[0][] = $this->translate_type($method->returns);
 
     # arguments
-    foreach ($method['expects'] as $type)
+    foreach ($method->expects as $type)
       $signature[0][] = $this->translate_type($type);
       
     ## 3. docstring
-    $docstring = $method['description'];
+    $docstring = $method->description;
 
     return compact('function', 'signature', 'docstring');
   }

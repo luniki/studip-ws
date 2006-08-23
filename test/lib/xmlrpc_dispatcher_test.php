@@ -33,7 +33,7 @@ class XmlrpcDispatcherTestCase extends UnitTestCase {
 
 
   function map_api_method($expects, $returns = NULL, $description = NULL) {
-    return $this->dispatcher->map_service_method(
+    return $this->dispatcher->map_method(
       $this->service->add_api_method(sprintf('function_in_line_%d',
                                              next(current(debug_backtrace()))),
                                      $expects,

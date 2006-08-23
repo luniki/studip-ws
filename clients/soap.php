@@ -16,7 +16,7 @@ define('WSDL_URL', 'http://pomona.virtuos.uos.de/~mlunzena/studip_ws/public/soap
 $client =& new soap_client(WSDL_URL, TRUE);
 $proxy = $client->getProxy();
 
-$result = $proxy->generate_text('secret', 5);
+$result = $proxy->generate_sentences('secret', 5);
 
 # an error occured
 if ($err = $proxy->getError())

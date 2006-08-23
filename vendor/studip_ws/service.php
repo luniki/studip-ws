@@ -81,35 +81,20 @@ class Studip_Ws_Service {
    *
    * @return void
    */
-  function add_api_method($name, $arguments = NULL, $returns = NULL,
+  function add_api_method($name, $expects = NULL, $returns = NULL,
                           $description = NULL) {
 
     # check $name
+
 # TODO
 #    if (!method_exists($this, $name . '_action'))
 #      trigger_error(sprintf('No such method exists: %s.', $name), E_USER_ERROR);
+
     if (isset($this->api_methods[$name]))
       trigger_error(sprintf('Method %s already added.', $name), E_USER_ERROR);
     
-    # check $arguments
-    if (is_null($arguments))
-      $arguments = array();
-    else if (!is_array($arguments))
-      trigger_error('Second argument is expected to be an array.',
-                    E_USER_ERROR);
-
-    # check $description
-    $description = (string) $description;
-
-    $expects = array();
-    foreach ($arguments as $entry) {
-      $expects[] = Studip_Ws_Api::translate_signature_entry($entry);
-    }
-    
-    $returns = Studip_Ws_Api::translate_signature_entry($returns);
-    
-    return $this->api_methods[$name] =
-      compact('expects', 'returns', 'description');
+    return $this->api_methods[$name] =&
+      new Studip_Ws_Method($this, $name, $expects, $returns, $description);
   }
   
   

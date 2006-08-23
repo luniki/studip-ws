@@ -54,4 +54,16 @@ class SoapServerDelegate {
   function invoke($function, $argument_array) {
     return new soap_fault('Server', '', 'SoapServerDelegate is abstract.');
   }
+  
+  
+  /**
+   * <MethodDescription>
+   *
+   * @param mixed <description>
+   *
+   * @return bool <description>
+   */
+  function register_services(&$server) {
+  	return FALSE;
+  }
 }

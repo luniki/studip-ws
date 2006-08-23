@@ -37,7 +37,7 @@ class ServiceTestCase extends UnitTestCase {
 
 
   function assertArgument(&$sig, $expected_type) {
-    $actual_type = array_shift($sig['expects']);
+    $actual_type = array_shift($sig->expects);
     $msg = sprintf('Types do not match. Actual: "%s" Expected: "%s"',
                    var_export($actual_type, TRUE),
                    var_export($expected_type, TRUE));
@@ -45,7 +45,7 @@ class ServiceTestCase extends UnitTestCase {
   }
   
   function assertDescription(&$sig, $expected_description) {
-    $actual_description = $sig['description'];
+    $actual_description = $sig->description;
     $msg = sprintf('Descriptions do not match. Actual: "%s" Expected: "%s"',
                    var_export($actual_description, TRUE),
                    var_export($expected_description, TRUE));
@@ -53,7 +53,7 @@ class ServiceTestCase extends UnitTestCase {
   }
   
   function assertReturnValue(&$sig, $expected_return_value) {
-    $actual_return_value = $sig['returns'];
+    $actual_return_value = $sig->returns;
     $msg = sprintf('Types do not match. Actual: "%s" Expected: "%s"',
                    var_export($actual_return_value, TRUE),
                    var_export($expected_return_value, TRUE));

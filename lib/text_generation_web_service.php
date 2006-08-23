@@ -14,6 +14,7 @@
 
 require_once 'markov_chainer.php';
 
+require_once '../test/fixtures/user_struct.php';
 
 /**
  * Text generation service using markov chains.
@@ -28,8 +29,14 @@ require_once 'markov_chainer.php';
 class TextGenerationWebService extends Studip_Ws_Service {
 
   function TextGenerationWebService () {
-    $this->add_api_method('generate_text', array('string', 'int'), 'string',
+    $this->add_api_method('generate_text',
+                          array('string', 'int'),
+                          'string',
                           'Generates text using Markov chains.');
+    $this->add_api_method('generate_sentences',
+                          array('string', 'int'),
+                          array(array('UserStruct')),
+                          'Generates sentences using Markov chains.');
   }
   
 
@@ -43,14 +50,20 @@ class TextGenerationWebService extends Studip_Ws_Service {
 
   # example filter applied to the service's result
   function after_filter($name, &$args, &$result) {
-    $result = strtolower($result);
+    if ($name === 'generate_text')
+      $result = strtolower($result);
   }
 
 
   # example service operation; generates some sentences using markov chains
-  function generate_text_action($api_key, $number_of_sentences) {
+  function generate_sentences_action($api_key, $number_of_sentences) {
 
-    $result = '';
+    $user = new UserStruct();
+    $user->name = "hallo";
+    $user->id   = 1;
+    return array(array($user, $user),array($user, $user));
+    
+    $result = array();
 
     # create 2nd order MarkovChainer 
     $order = 2;
@@ -58,11 +71,19 @@ class TextGenerationWebService extends Studip_Ws_Service {
     $mc =& new MarkovChainer($order);
     $mc->add_text(file_get_contents($text));
     
-    if ($number_of_sentences < 1) $number_of_sentences = 1;
+    if ($number_of_sentences < 1)
+      $number_of_sentences = 1;
     
     for ($i = 0; $i < $number_of_sentences; ++$i)
-      $result .= $mc->generate_sentence() . "\n";
+      $result[] = $mc->generate_sentence();
 
     return $result;
+  }
+
+
+  # example service operation; generates some text using markov chains
+  function generate_text_action($api_key, $number_of_sentences) {
+    return join("\n", $this->generate_sentences_action($api_key,
+                                                       $number_of_sentences));
   }
 }

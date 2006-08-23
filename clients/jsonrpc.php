@@ -14,10 +14,10 @@
 require_once '../vendor/phpxmlrpc/xmlrpc.inc';
 require_once '../vendor/phpxmlrpc/jsonrpc.inc';
 
-define('JSONRPC_ENDPOINT', 'http://localhost/~mlunzena/studip_ws_example/public/jsonrpc.php');
+define('JSONRPC_ENDPOINT', 'http://pomona.virtuos.uos.de/~mlunzena/studip_ws/public/jsonrpc.php');
 $client =& new jsonrpc_client(JSONRPC_ENDPOINT);
 
-$message =& new jsonrpcmsg('textgenerationwebservice.generate_text',
+$message =& new jsonrpcmsg('generate_text',
                            array(php_jsonrpc_encode('secret'),
                                  php_jsonrpc_encode(5)));
 $result = $client->send($message);

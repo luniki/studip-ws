@@ -37,14 +37,11 @@ $delegate =& new Studip_Ws_SoapDispatcher('TextGenerationWebService');
 $server   =& new DelegatingSoapServer($delegate);
 
 ###### creating WSDL ###########################################################
+$namespace = 'urn:studip_wsd';
+$server->configureWSDL('Stud.IP Webservice', $namespace);
+$server->wsdl->schemaTargetNamespace = $namespace;
 
-$server->configureWSDL('Stud.IP Webservice', 'urn:studip_wsd');
-
-# Operations
-$server->wsdl->addOperation('generate_text',
-                            array('api_key'             => 'xsd:string',
-                                  'number_of_sentences' => 'xsd:int'),
-                            array('return'  => 'xsd:string'));
+$server->registerServices();
 
 # start server
 $server->service(isset($HTTP_RAW_POST_DATA) ? $HTTP_RAW_POST_DATA : '');

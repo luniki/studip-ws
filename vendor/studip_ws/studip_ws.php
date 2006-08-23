@@ -14,5 +14,6 @@
 require_once 'api.php';
 require_once 'dispatcher.php';
 require_once 'fault.php';
+require_once 'method.php';
 require_once 'service.php';
 require_once 'struct.php';
