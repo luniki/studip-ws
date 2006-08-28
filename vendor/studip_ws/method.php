@@ -95,8 +95,8 @@ class Studip_Ws_Method {
 	  $this->returns = $returns;
 
     foreach ($this->expects as $key => $entry)
-      $this->expects[$key] = Studip_Ws_Api::translate_signature_entry($entry);
+      $this->expects[$key] = Studip_Ws_Type::translate($entry);
     
-    $this->returns = Studip_Ws_Api::translate_signature_entry($this->returns);
+    $this->returns = Studip_Ws_Type::translate($this->returns);
 	}
 }

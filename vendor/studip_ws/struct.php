@@ -51,7 +51,7 @@ class Studip_Ws_Struct {
                     E_USER_ERROR);
 
     # translate type description
-    $type = Studip_Ws_Api::translate_signature_entry($type);
+    $type = Studip_Ws_Type::translate($type);
 
     # TODO options
 

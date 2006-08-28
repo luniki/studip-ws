@@ -66,6 +66,11 @@ class Studip_Ws_SoapDispatcher extends Studip_Ws_Dispatcher
     return TRUE;
   }
 
+  
+  function register_operations($server) {
+  	
+  }
+
 
   /**
    * <MethodDescription>

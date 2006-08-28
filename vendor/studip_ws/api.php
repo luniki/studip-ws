@@ -30,9 +30,9 @@ define('STUDIP_WS_TYPE_NULL',   'null');
  * @copyright (c) Authors
  * @version   $Id$
  */
-class Studip_Ws_Api {
+class Studip_Ws_Type {
   
-  function translate_signature_entry($type) {
+  function translate($type) {
 
     # complex types
     if (is_string($type) &&
@@ -49,7 +49,7 @@ class Studip_Ws_Api {
         trigger_error('Array of unknown type.', E_USER_ERROR);
          
       return array(STUDIP_WS_TYPE_ARRAY =>
-                   Studip_Ws_Api::translate_signature_entry($array_type));
+                   Studip_Ws_Type::translate($array_type));
     }
 
     # basic types
