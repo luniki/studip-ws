@@ -11,7 +11,7 @@
  * the License, or (at your option) any later version.
  */
 
-require_once 'api.php';
+require_once 'type.php';
 require_once 'dispatcher.php';
 require_once 'fault.php';
 require_once 'method.php';

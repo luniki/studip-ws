@@ -1,7 +1,7 @@
 <?php
 
 /*
- * api.php - <short-description>
+ * type.php - <short-description>
  *
  * Copyright (C) 2006 - Marcus Lunzenauer <mlunzena@uos.de>
  *
