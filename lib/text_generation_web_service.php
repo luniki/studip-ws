@@ -60,7 +60,9 @@ class TextGenerationWebService extends Studip_Ws_Service {
 
     $user = new UserStruct();
     $user->name = "hallo";
-    $user->id   = 1;
+    $user->id   = NULL;
+    $user->mentor = 1;
+    $user->mentors = array(1,1,1);
     return array(array($user, $user),array($user, $user));
     
     $result = array();

@@ -7,7 +7,7 @@
  * http://json-rpc.org/
  *
  * @author Gaetano Giunta
- * @version $Id: jsonrpc.inc,v 1.7 2006/02/20 22:51:12 ggiunta Exp $
+ * @version $Id: jsonrpc.inc,v 1.14 2006/08/21 14:48:15 ggiunta Exp $
  * @copyright (c) 2005-2006 G. Giunta
  *
  **/
@@ -458,40 +458,40 @@
 								{
 									break;
 								}
-					  			switch($data[$i+1])
+								switch($data[$i+1])
 								{
-					  				case 'b':
-					  				case 'f':
-					  				case 'n':
-					  				case 'r':
-					  				case 't':
-					  				case 'v':
-					  					$GLOBALS['_xh']['ac'] .= $GLOBALS['ecma262_entities'][$data[$i+1]];
-					  					$i++;
-					  					break;
-					  				case 'u':
-					  					// most likely unicode code point
-					  					if ($dest_encoding == 'UTF-8')
+									case 'b':
+									case 'f':
+									case 'n':
+									case 'r':
+									case 't':
+									case 'v':
+										$GLOBALS['_xh']['ac'] .= $GLOBALS['ecma262_entities'][$data[$i+1]];
+										$i++;
+										break;
+									case 'u':
+										// most likely unicode code point
+										if ($dest_encoding == 'UTF-8')
 										{
-		  									// aargh! encode the UTF code point into utf-8...
-		  									/// @todo...
+											// aargh! encode the UTF code point into utf-8...
+											/// @todo...
 										}
 										else
 										{
-		  									$GLOBALS['_xh']['ac'] .= chr(hexdec(substr($data, $i+4, 2)));
+											$GLOBALS['_xh']['ac'] .= chr(hexdec(substr($data, $i+4, 2)));
 										}
-					  				case 'x':
-					  					//most likely unicode code point in hexadecimal
-				  						// Note: the json spec omits this case, but ECMA-262 does not...
-					  					// most likely unicode code point
-					  					if ($dest_encoding == 'UTF-8')
+									case 'x':
+										//most likely unicode code point in hexadecimal
+										// Note: the json spec omits this case, but ECMA-262 does not...
+										// most likely unicode code point
+										if ($dest_encoding == 'UTF-8')
 										{
-		  									// aargh! encode the UTF code point into utf-8...
-		  									/// todo...
+											// aargh! encode the UTF code point into utf-8...
+											/// todo...
 										}
 										else
 										{
-		  									$GLOBALS['_xh']['ac'] .= chr(hexdec(substr($data, $i+2, 2)));
+											$GLOBALS['_xh']['ac'] .= chr(hexdec(substr($data, $i+2, 2)));
 										}
 									case '0':
 									case '1':
@@ -503,29 +503,29 @@
 									case '7':
 									case '8':
 									case '9':
-				  						// Note: ECMA-262 forbids these escapes, we just skip it...
-				  						break;
+										// Note: ECMA-262 forbids these escapes, we just skip it...
+										break;
 									default:
 										// Note: Javascript 1.5 on http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Guide
 										// mentions syntax /XXX with X octal number, but ECMA262
 										// explicitly forbids it...
-					  					$GLOBALS['_xh']['ac'] .= $data[$i+1];
-					  					$i++;
-					  			} // end of switch on slash char found
-					  			break;
-					  		case $delim:
-					  			// found unquoted end of string in middle of string
-					  			$GLOBALS['_xh']['isf_reason'] = 'Invalid data (unescaped quote char inside string?)';
-					  			return false;
-					  		default:
-					  			$GLOBALS['_xh']['ac'] .= $data[$i];
+										$GLOBALS['_xh']['ac'] .= $data[$i+1];
+										$i++;
+								} // end of switch on slash char found
+								break;
+							case $delim:
+								// found unquoted end of string in middle of string
+								$GLOBALS['_xh']['isf_reason'] = 'Invalid data (unescaped quote char inside string?)';
+								return false;
+							default:
+								$GLOBALS['_xh']['ac'] .= $data[$i];
 						}
 					} // end of loop on string chars
 //echo "Found a string\n";
 					$GLOBALS['_xh']['vt'] = 'string';
 					if ($src_encoding == 'UTF-8' && ($dest_encoding == 'ISO-8859-1' || $dest_encoding == 'US-ASCII'))
 					{
-		  				$GLOBALS['_xh']['value'] = utf8_decode($GLOBALS['_xh']['ac']);
+						$GLOBALS['_xh']['value'] = utf8_decode($GLOBALS['_xh']['ac']);
 					}
 					else
 					{
@@ -548,12 +548,12 @@
 			default:
 				// be tolerant of uppercase chars in numbers/booleans/null
 				$data = strtolower($data);
-	  			if ($data == "true")
+				if ($data == "true")
 				{
 //echo "Found a true\n";
 					$GLOBALS['_xh']['value'] = true;
 					$GLOBALS['_xh']['vt'] = 'boolean';
-	  			}
+				}
 				else if ($data == "false")
 				{
 //echo "Found a false\n";
@@ -566,8 +566,8 @@
 					$GLOBALS['_xh']['value'] = null;
 					$GLOBALS['_xh']['vt'] = 'null';
 				}
-	  			// we could use is_numeric here, but rules are slightly different,
-	  			// e.g. 012 is NOT valid according to JSON
+				// we could use is_numeric here, but rules are slightly different,
+				// e.g. 012 is NOT valid according to JSON
 				else if (ereg("^[-]?(0|[1-9][0-9]*)(.[0-9]+)?([e][+-]?[0-9]+)?$" ,$data))
 				{
 					if (ereg('[.e]', $data))
@@ -612,7 +612,7 @@
 	function json_parse_native($data)
 	{
 //echo "Parsing string - internal way (".$data.")\n";
-		$out =  json_decode($data, true);
+		$out = json_decode($data, true);
 		// decoding will be fine for a json error response, so we have to
 		// check for it by hand here...
 		if (!is_array($out) || !array_key_exists('result', $out)
@@ -712,35 +712,48 @@
 			}
 			if (!$return_phpvals)
 			{
-				$GLOBALS['_xh']['value']['error'] = php_jsonrpc_decode($GLOBALS['_xh']['value']['error']);
+				$d_error = php_jsonrpc_decode($GLOBALS['_xh']['value']['error']);
 				$GLOBALS['_xh']['value']['id'] = php_jsonrpc_decode($GLOBALS['_xh']['value']['id']);
 			}
-			$GLOBALS['_xh']['id'] =  $GLOBALS['_xh']['value']['id'];
-			if ($GLOBALS['_xh']['value']['error'] != null)
+			else
+			{
+				$d_error = $GLOBALS['_xh']['value']['error'];
+			}
+			$GLOBALS['_xh']['id'] = $GLOBALS['_xh']['value']['id'];
+			if ($d_error != null)
 			{
 				$GLOBALS['_xh']['isf'] = 1;
 
-				$GLOBALS['_xh']['value'] = $GLOBALS['_xh']['value']['error'];
-				if (is_array($GLOBALS['_xh']['value']) && array_key_exists('faultCode', $GLOBALS['_xh']['value'])
-					&& array_key_exists('faultString', $GLOBALS['_xh']['value']))
+				//$GLOBALS['_xh']['value'] = $d_error;
+				if (is_array($d_error) && array_key_exists('faultCode', $d_error)
+					&& array_key_exists('faultString', $d_error))
 				{
-					if($GLOBALS['_xh']['value']['faultCode'] == 0)
+					if($d_error['faultCode'] == 0)
 					{
 						// FAULT returned, errno needs to reflect that
-						$GLOBALS['_xh']['value']['faultCode'] = -1;
+						$d_error['faultCode'] = -1;
 					}
+					$GLOBALS['_xh']['value'] = $d_error;
 				}
 				// NB: what about jsonrpc servers that do NOT respect
 				// the faultCode/faultString convention???
+				// we force the error into a string. regardless of type...
 				else //if (is_string($GLOBALS['_xh']['value']))
 				{
-					$GLOBALS['_xh']['value'] = array('faultCode' => -1, 'faultString' => $GLOBALS['_xh']['value']);
+					if ($return_phpvals)
+					{
+						$GLOBALS['_xh']['value'] = array('faultCode' => -1, 'faultString' => var_export($GLOBALS['_xh']['value']['error'], true));
+					}
+					else
+					{
+						$GLOBALS['_xh']['value'] = array('faultCode' => -1, 'faultString' => serialize_jsonrpcval($GLOBALS['_xh']['value']['error']));
+					}
 				}
 
 			}
 			else
 			{
-				$GLOBALS['_xh']['value'] =  $GLOBALS['_xh']['value']['result'];
+				$GLOBALS['_xh']['value'] = $GLOBALS['_xh']['value']['result'];
 			}
 			return true;
 
@@ -784,9 +797,9 @@
 
 		function createPayload($charset_encoding='')
 		{
-			// @ todo: verify if all chars are  allowed for method names or can
+			// @ todo: verify if all chars are allowed for method names or can
 			// we just skip the js encoding on it?
-			$this->payload = "{\nmethod: \"" . json_encode_entities($this->methodname, '', $charset_encoding) . "\",\nparams: [ ";
+			$this->payload = "{\n\"method\": \"" . json_encode_entities($this->methodname, '', $charset_encoding) . "\",\n\"params\": [ ";
 			for($i = 0; $i < sizeof($this->params); $i++)
 			{
 				$p = $this->params[$i];
@@ -796,7 +809,7 @@
 				$this->payload .= "\n  " . serialize_jsonrpcval($p, $charset_encoding) .
 				",";
 			}
-			$this->payload = substr($this->payload, 0, -1) . "\n],\nid: " . ($this->id == null ? 'null' : $this->id) . "\n}\n";
+			$this->payload = substr($this->payload, 0, -1) . "\n],\n\"id\": " . ($this->id == null ? 'null' : $this->id) . "\n}\n";
 		}
 
 		/**
@@ -821,15 +834,17 @@
 
 			$GLOBALS['_xh']=array();
 
+			$raw_data = $data;
 			// parse the HTTP headers of the response, if present, and separate them from data
 			if(ereg("^HTTP",$data))
 			{
 				$r =& $this->parseResponseHeaders($data, $headers_processed);
 				if ($r)
 				{
-					// parent class implmentation of parseResponseHeaders returns in case
-					// of error an object of the wrong type: decode it into correct object
-					return new jsonrpcresp(0, $r->faultCode(), $r->faultString());
+					// parent class implementation of parseResponseHeaders returns in case
+					// of error an object of the wrong type: recode it into correct object
+					$rj =& new jsonrpcresp(0, $r->faultCode(), $r->faultString());
+					return $rj;
 				}
 			}
 			else
@@ -853,6 +868,7 @@
 				$r =& new jsonrpcresp($data, 0, '', 'json');
 				$r->hdrs = $GLOBALS['_xh']['headers'];
 				$r->_cookies = $GLOBALS['_xh']['cookies'];
+				$r->raw_data = $raw_data;
 				return $r;
 			}
 
@@ -900,6 +916,7 @@
 
 			$r->hdrs = $GLOBALS['_xh']['headers'];
 			$r->_cookies = $GLOBALS['_xh']['cookies'];
+			$r->raw_data = $raw_data;
 			return $r;
 		}
 	}
@@ -923,6 +940,7 @@
 	{
 		function serialize($charset_encoding='')
 		{
+/*echo "GO GO GO!";*/
 			return serialize_jsonrpcval($this, $charset_encoding);
 		}
 	}
@@ -932,7 +950,7 @@
 	* and translates it into native PHP types.
 	*
 	* @param  jsonrpcval $jsonrpc_val
-	* @param  array	  $options	if 'decode_php_objs' is set in the options array, jsonrpc objects can be decoded into php objects
+	* @param  array      $options if 'decode_php_objs' is set in the options array, jsonrpc objects can be decoded into php objects
 	* @return mixed
 	*/
 	function php_jsonrpc_decode($jsonrpc_val, $options='')
@@ -1058,7 +1076,10 @@
 			case 'boolean':
 				$jsonrpc_val->addScalar($php_val, $GLOBALS['xmlrpcBoolean']);
 				break;
-			// catch "resource", "NULL", "user function", "unknown type"
+			case 'NULL':
+				$jsonrpc_val->addScalar($php_val, $GLOBALS['xmlrpcNull']);
+				break;
+			// catch "resource", "user function", "unknown type"
 			default:
 				break;
 			}
@@ -1066,7 +1087,7 @@
 	}
 
 	/**
-	* Serialize a jsonrpcresp (or  xmlrpcresp) as json.
+	* Serialize a jsonrpcresp (or xmlrpcresp) as json.
 	* Moved outside of the corresponding class to ease multi-serialization of
 	* xmlrpcresp objects
 	* @param xmlrpcresp or jsonrpcresp $resp
@@ -1077,12 +1098,12 @@
 	*/
 	function serialize_jsonrpcresp($resp, $id="null", $charset_encoding='')
 	{
-		$result = "{\n\"id\": " . ($id == null ? 'null' : $id) . ", ";
+		$result = "{\n\"id\": " . ($id === null ? 'null' : $id) . ", ";
 		if($resp->errno)
 		{
 			// let non-ASCII response messages be tolerated by clients
 			// by encoding non ascii chars
-			$result .= "\"error\": { \"Code\": " . $resp->errno . ", \"String\": \"" . json_encode_entities($resp->errstr, null, $charset_encoding) . "\" }, \"result\": null";
+			$result .= "\"error\": { \"faultCode\": " . $resp->errno . ", \"faultString\": \"" . json_encode_entities($resp->errstr, null, $charset_encoding) . "\" }, \"result\": null";
 		}
 		else
 		{
@@ -1109,13 +1130,16 @@
 	}
 
 	/**
-	* Serialize a jsonrpcval (or  xmlrpcval) as json.
+	* Serialize a jsonrpcval (or xmlrpcval) as json.
 	* Moved outside of the corresponding class to ease multi-serialization of
 	* xmlrpcval objects
 	* @access private
 	*/
 	function serialize_jsonrpcval($value, $charset_encoding='')
 	{
+/*echo "HERE WE GO!";
+var_dump($value);*/
+
 		reset($value->me);
 		list($typ, $val) = each($value->me);
 

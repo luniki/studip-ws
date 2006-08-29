@@ -28,49 +28,13 @@ class Studip_Ws_SoapDispatcher extends Studip_Ws_Dispatcher
 
 
   /**
-   * <MethodDescription>
+   * <FieldDescription>
    *
-   * @param mixed <description>
-   *
-   * @return bool <description>
+   * @access private
+   * @var <type>
    */
-  function register_services(&$server) {
-
-    $namespace = $server->wsdl->schemaTargetNamespace;
-
-    foreach ($this->api_methods as $method_name => $method) {
-
-      # return value
-      $method->returns = array('returns' =>
-        $this->translate_type($server, $method->returns));
-
-      # arguments
-      $expects = array();
-      foreach ($method->expects as $key => $type)
-        $expects['param'.$key] = $this->translate_type($server, $type);
-      $method->expects = $expects;
-
-      $server->register($method->name,
-                        #array('api_key'             => 'xsd:string',
-                        #      'number_of_sentences' => 'xsd:int'),
-                        $method->expects,
-                        #array('return'  => 'xsd:string'),
-                        $method->returns,
-                        $namespace,
-                        $namespace . '#' . $method->name,
-                        'rpc',
-                        'encoded',
-                        $method->description);
-    }
-    
-    return TRUE;
-  }
-
+  var $types = array();
   
-  function register_operations($server) {
-  	
-  }
-
 
   /**
    * <MethodDescription>
@@ -89,94 +53,178 @@ class Studip_Ws_SoapDispatcher extends Studip_Ws_Dispatcher
    * <MethodDescription>
    *
    * @param type <description>
+   *
+   * @return type <description>
+   */
+  function register_operations(&$server) {
+
+    $namespace = $server->wsdl->schemaTargetNamespace;
+
+    # 1st pass: register operations
+    foreach ($this->api_methods as $method) {
+
+      # return value
+      $this->store_type($method->returns);
+      $returns = array('returns' => $this->type_to_name_wns($method->returns));
+
+      # arguments
+      $expects = array();
+      foreach ($method->expects as $name => $argument) {
+        $expects['param'.$name] =
+          $this->type_to_name_wns($method->expects[$name]);
+        $this->store_type($method->expects[$name]);
+      }
+      
+      $server->register($method->name,
+                        $expects,
+                        $returns,
+                        $namespace,
+                        $namespace . '#' . $method->name,
+                        'rpc',
+                        'encoded',
+                        $method->description);
+    }
+    
+
+    # recursively find all types
+    foreach ($this->types as $key => $type)
+      $this->store_type_recursive($this->types[$key]);
+
+    # 2nd pass: register types
+    foreach ($this->types as $key => $type) {
+
+      if (Studip_Ws_Type::is_array($type)) {
+        $name = $this->type_to_name($type);
+        $element_name = $this->type_to_name_wns(current($type));
+        $server->wsdl->addComplexType($name,
+                                      'complexType',
+                                      'array',
+                                      '',
+                                      'SOAP-ENC:Array',
+                                      array(),
+                                      array(array(
+                                        'ref' => 'SOAP-ENC:arrayType',
+                                        'wsdl:arrayType' => $element_name . '[]')),
+                                      $element_name);
+      }
+      
+      else {
+
+        $name = $this->type_to_name($type);
+        $struct =& new $name();
+
+        $elements = array();
+        foreach ($struct->get_elements() as $element) {
+          $elements[$element->name] = array(
+            'name' => $element->name,
+            'type' => $this->type_to_name_wns($element->type));
+        }
+        
+        $server->wsdl->addComplexType($name,
+                                      'complexType',
+                                      'struct',
+                                      'all',
+                                      '',
+                                      $elements);
+      }
+    }
+  }
+
+  /**
+   * <MethodDescription>
+   *
    * @param type <description>
    *
    * @return type <description>
    */
-  function translate_type($server, $type) {
+  function type_to_name_wns(&$type) {
+    return sprintf('%s:%s',
+                   Studip_Ws_Type::is_complex($type) ? 'tns' : 'xsd',
+                   $this->type_to_name($type));
+  }
 
-    # primitive types
-    if (is_string($type))
 
-      switch ($type) {
-        case STUDIP_WS_TYPE_INT:
-                                   return 'xsd:int';
-
-        case STUDIP_WS_TYPE_STRING:
-                                   return 'xsd:string';
-
-        case STUDIP_WS_TYPE_BASE64:
-                                   return 'xsd:base64';
-
-        case STUDIP_WS_TYPE_BOOL:
-                                   return 'xsd:boolean';
-
-        case STUDIP_WS_TYPE_FLOAT:
-                                   return 'xsd:double';
-
-        case STUDIP_WS_TYPE_NULL:
-                                   return 'xsd:boolean';
+  /**
+   * <MethodDescription>
+   *
+   * @param type <description>
+   *
+   * @return type <description>
+   */
+  function type_to_name(&$type) {
+    if (Studip_Ws_Type::is_array($type)) {
+      for ($name = '', $element_type = $type;
+           Studip_Ws_Type::is_array($element_type);
+           $element_type = current($element_type)) {
+        $name .= 'Array';
       }
+      return $this->type_to_name($element_type) . $name;
+    }
     
-    # complex types
-    if (is_array($type)) {
-
-var_dump($server->wsdl->complexTypes);
+    else if (Studip_Ws_Type::is_struct($type)) {
+      return current($type);
+    }
     
-      # is an array
-      if (($key = key($type)) === STUDIP_WS_TYPE_ARRAY) {
-        
-        list($element_ns, $element_type) =
-          explode(':', $this->translate_type($server, current($type)));
-        
-        $server->wsdl->addComplexType(
-          $element_type . 'Array',
-          'complexType', 'array', '', 'SOAP-ENC:Array', array(),
-          array(
-            array('ref' => 'SOAP-ENC:arrayType',
-                  'wsdl:arrayType' => 'tns:'.$element_type.'[]')),
-          $element_ns.':'.$element_type
-        );
+    else {
+
+      $mapping = array(
+        STUDIP_WS_TYPE_INT    => 'int',
+        STUDIP_WS_TYPE_STRING => 'string',
+        STUDIP_WS_TYPE_BASE64 => 'base64',
+        STUDIP_WS_TYPE_BOOL   => 'boolean',
+        STUDIP_WS_TYPE_FLOAT  => 'double',
+        STUDIP_WS_TYPE_NULL   => 'boolean');
       
-        return 'tns:' . $element_type . 'Array';      
+      if (isset($mapping[$type]))
+        return $mapping[$type];
+    }
+    
+    trigger_error(sprintf('Type not known: %s', var_export($type, TRUE)),
+                  E_USER_ERROR);    
+  }
+
+
+  /**
+   * <MethodDescription>
+   *
+   * @param type <description>
+   *
+   * @return type <description>
+   */
+  function store_type(&$type) {
+    if (isset($this->types[$name = $this->type_to_name_wns($type)]))
+      return FALSE;
+    if (!Studip_Ws_Type::is_complex($type))
+      return FALSE;
+    $this->types[$name] =& $type;
+  }
+
+
+  /**
+   * <MethodDescription>
+   *
+   * @param type <description>
+   *
+   * @return type <description>
+   */
+  function store_type_recursive(&$type) {
+
+    if (!Studip_Ws_Type::is_complex($type))
+      return;
+
+    if (Studip_Ws_Type::is_array($type)) {
+      $element_type =& current($type);
+      $this->store_type($element_type);
+      $this->store_type_recursive($element_type);
+    }
+
+    if (Studip_Ws_Type::is_struct($type)) {
+      $struct_type =& current($type);
+      $struct =& new $struct_type();
+      foreach ($struct->get_elements() as $element) {
+        if ($this->store_type($element->type))
+          $this->store_type_recursive($element->type);
       }
-      
-      # is a struct
-      if ($key === STUDIP_WS_TYPE_STRUCT) {
-
-
-
-        $struct_type = current($type);
-        $this->symbols[strtolower($struct_type)] = TRUE;
-        # var_dump('set symbol: ' . $struct_type);
-        
-        $struct =& new $struct_type();
-
-        $struct_elements = array();
-        foreach ($struct->get_elements() as $element) {
-
-# var_dump('asking for '.current($element->type));
-if (isset($this->symbols[strtolower(current($element->type))])) {
-  # var_dump('found ' . current($element->type));
-  return 'tns:' . current($element->type);
-}
-
-          $struct_elements[$element->name] = array(
-            'name' => $element->name,
-            'type' => $this->translate_type($server, $element->type));
-        }
-        
-        $server->wsdl->addComplexType($struct_type,
-          'complexType', 'struct', 'all', '', $struct_elements);
-        
-        return 'tns:' . $struct_type;
-      }
-    }      
-
-    trigger_error(sprintf('Type %s could not be found.', 
-                          var_export($type, TRUE)),
-                  E_USER_ERROR);
-
-#    return 'tns:' . $type;
+    }
   }
 }

@@ -41,7 +41,7 @@ $namespace = 'urn:studip_wsd';
 $server->configureWSDL('Stud.IP Webservice', $namespace);
 $server->wsdl->schemaTargetNamespace = $namespace;
 
-$server->registerServices();
+$delegate->register_operations($server);
 
 # start server
 $server->service(isset($HTTP_RAW_POST_DATA) ? $HTTP_RAW_POST_DATA : '');

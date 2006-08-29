@@ -93,4 +93,18 @@ class Studip_Ws_Type {
     
     trigger_error('"' . var_export($type, TRUE) . '" is not a valid type.');
   }
+  
+  function is_complex($type) {
+    return is_array($type);
+  }
+  
+  function is_array($type) {
+    return Studip_Ws_Type::is_complex($type) &&
+           key($type) === STUDIP_WS_TYPE_ARRAY;
+  }
+  
+  function is_struct($type) {
+    return Studip_Ws_Type::is_complex($type) &&
+           key($type) === STUDIP_WS_TYPE_STRUCT;
+  }
 }

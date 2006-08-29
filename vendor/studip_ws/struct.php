@@ -45,13 +45,9 @@ class Studip_Ws_Struct {
 	function add_element($name, $type, $options = array()) {
 
     # name must not exist
-    $name = (string) $name;
     if (isset($this->struct_fields[$name]))
       trigger_error(sprintf('Element %s already defined.', $name),
                     E_USER_ERROR);
-
-    # translate type description
-    $type = Studip_Ws_Type::translate($type);
 
     # TODO options
 
@@ -144,7 +140,7 @@ class Studip_Ws_StructElement {
 	 */
 	function Studip_Ws_StructElement($name, $type, $options = array()) {
 	  $this->name = (string) $name;
-	  $this->type = $type;
-	  $this->options = $options;
+	  $this->type = Studip_Ws_Type::translate($type);
+	  $this->options = 1;
 	}
 }

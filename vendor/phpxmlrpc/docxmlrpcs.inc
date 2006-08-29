@@ -3,7 +3,7 @@
  * Self-documenting extension to the PHP-XMLRPC server
  *
  * @author Gaetano Giunta
- * @version $Id: docxmlrpcs.inc,v 1.3 2006/01/30 13:13:03 ggiunta Exp $
+ * @version $Id: docxmlrpcs.inc,v 1.4 2006/05/14 18:03:41 ggiunta Exp $
  * @copyright (c) 2005 G. Giunta
  *
  * @todo use some AJAX magic to implement xmlrpc calls to test/debug methods
@@ -15,6 +15,13 @@
 
 	// requires: xmlrpc.inc, xmlrpcs.inc (version 2.0RC3 or later)
 
+	/**
+	* Extends the base xmlrpc server with the capability to generate documentation
+	* about the exposed xmlrpc methods.
+	* It will take advantage of a new memeber in the dispatch map: signature_docs
+	* it is expected to be an array with the same number of memebers as signature,
+	* but containing a short description for every parameter.
+	*/
 	class documenting_xmlrpc_server extends xmlrpc_server
 	{
 		/// default format for generated documentation: either wsdl or html
@@ -71,9 +78,9 @@
 
 	}
 
-
 	/**
 	* Generate the documentation about methods exposed by a given server.
+	* Note that it will NOT html-escape the user provided documentantation (ie. risky).
 	* @param xmlrpcserver $server
 	* @param string $doctype type of documentation to generate: html (default), wsdl, etc...
 	* @param string $lang language for docs
@@ -117,17 +124,23 @@
 					{
 						$payload .= xmlrpc_smarty($template['methodheader'], array('method' => $_GET['methodName'], 'desc' => @$methods[$_GET['methodName']]['docstring']));
 						//$payload .= xmlrpc_smarty($template['methodfound']);
-						$i = 1;
-						foreach ($methods[$_GET['methodName']]['signature'] as $val)
+						for ($i = 0; $i < count($methods[$_GET['methodName']]['signature']); $i++)
 						{
-							$payload .= xmlrpc_smarty($template['sigheader'], array('signum' => $i));
-							$out = array_shift($val);
-							foreach ($val as $key)
+							$val = $methods[$_GET['methodName']]['signature'][$i];
+							// NEW: signature_docs array, MIGHT be present - or not...
+							$doc = @$methods[$_GET['methodName']]['signature_docs'][$i];
+							if (!is_array($doc) || !count($doc))
 							{
-								$payload .= xmlrpc_smarty($template['sigparam'], array('paramtype' => $key));
+								$doc = array_fill(0, count($val), '');
 							}
-							$payload .= xmlrpc_smarty($template['sigfooter'], array('outtype' => $out, 'method' => $_GET['methodName']));
-							$i++;
+							$payload .= xmlrpc_smarty($template['sigheader'], array('signum' => $i+1));
+							$out = array_shift($val);
+							$outdoc = array_shift($doc);
+							for ($j = 0; $j < count($val); $j++)
+							{
+								$payload .= xmlrpc_smarty($template['sigparam'], array('paramtype' => $val[$j], 'paramdesc' => @$doc[$j]));
+							}
+							$payload .= xmlrpc_smarty($template['sigfooter'], array('outtype' => $out, 'outdesc' => $outdoc, 'method' => $_GET['methodName']));
 						}
 						$payload .= xmlrpc_smarty($template['methodfooter'], array('method' => $_GET['methodName']));
 					}
@@ -157,7 +170,8 @@
 		return $payload;
 	}
 
-	/** Dumb smarty-like template system
+	/**
+	* Dumb (dumb dumb) smarty-like template system
 	* @param string $template the template text, using {$var} syntax for substitution
 	* @param array $params array of variables to be substituted in template, based on array key
 	*
@@ -173,7 +187,10 @@
 		return $template;
 	}
 
-	/// Templates used for building docs
+	/**
+	* Templates used for building docs
+	* The charset is assumed to be ISO-8859-1 for every generated html. Take care
+	*/
 	$GLOBALS['xmlrpcdocparts'] = array(
 		'html' => array(
 
@@ -189,6 +206,16 @@
 <meta http-equiv="Content-Script-Type" content="text-javascript" />
 <meta name="generator" content="'.$GLOBALS['xmlrpcName'].'" />
 <style>
+/**
+ * CSS stylesheet for HTML documentation of xmlrpc methods.
+ *   original style copied from XINS project (http://xins.sourceforge.net),
+ *   from Ernst de Haan and Chris Gilbride
+ *
+ * @author Gaetano Giunta
+ * @version $Id: docxmlrpcs.css,v 1.1 2005/12/01 14:46:29 ggiunta Exp $
+ * @copyright (c) 2005 G. Giunta
+ **/
+
 body {
 	font-family: sans-serif;
 	color: #000000;
@@ -711,14 +738,14 @@ div.broken_freeze {
 <tr><th>Type</th><th>Description</th></tr>',
 
 'sigparam' => '
-<tr><td>{$paramtype}</td><td></td></tr>',
+<tr><td>{$paramtype}</td><td>{$paramdesc}</td></tr>',
 
 'sigfooter' => '
 </table>
 <h3>Output parameter</h3>
 <table class="inputparameters">
 <tr><th>Type</th><th>Description</th></tr>
-<tr><td>{$outtype}</td><td></td></tr>
+<tr><td>{$outtype}</td><td>{$outdesc}</td></tr>
 </table>
 </blockquote>',
 

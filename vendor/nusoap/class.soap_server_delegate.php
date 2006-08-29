@@ -61,9 +61,9 @@ class SoapServerDelegate {
    *
    * @param mixed <description>
    *
-   * @return bool <description>
+   * @return void
    */
-  function register_services(&$server) {
-  	return FALSE;
+  function register_operations(&$server) {
+  	return;
   }
 }
