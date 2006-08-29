@@ -13,7 +13,6 @@
 
 
 require_once 'markov_chainer.php';
-
 require_once '../test/fixtures/user_struct.php';
 
 /**
@@ -26,6 +25,7 @@ require_once '../test/fixtures/user_struct.php';
  * @copyright (c) Authors
  * @version   $Id$
  */
+
 class TextGenerationWebService extends Studip_Ws_Service {
 
   function TextGenerationWebService () {

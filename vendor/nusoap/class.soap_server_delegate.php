@@ -29,6 +29,7 @@
 
 class SoapServerDelegate {
 
+
   /**
    * This method is called to verify the existence of a soap-mapped function.
    *

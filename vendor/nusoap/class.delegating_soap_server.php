@@ -79,6 +79,7 @@ class DelegatingSoapServer extends soap_server {
       }
       
       else if ($this->opData = $this->wsdl->getOperationDataForSoapAction($this->SOAPAction)) {
+
         # Note: hopefully this case will only be used for doc/lit,
         # since rpc services should have wrapper element
         $this->debug('in invoke_method, found WSDL soapAction=' .
