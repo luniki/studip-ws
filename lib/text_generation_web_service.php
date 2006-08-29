@@ -35,7 +35,7 @@ class TextGenerationWebService extends Studip_Ws_Service {
                           'Generates text using Markov chains.');
     $this->add_api_method('generate_sentences',
                           array('string', 'int'),
-                          array(array('UserStruct')),
+                          array('string'),
                           'Generates sentences using Markov chains.');
   }
   
@@ -57,14 +57,7 @@ class TextGenerationWebService extends Studip_Ws_Service {
 
   # example service operation; generates some sentences using markov chains
   function generate_sentences_action($api_key, $number_of_sentences) {
-
-    $user = new UserStruct();
-    $user->name = "hallo";
-    $user->id   = NULL;
-    $user->mentor = 1;
-    $user->mentors = array(1,1,1);
-    return array(array($user, $user),array($user, $user));
-    
+   
     $result = array();
 
     # create 2nd order MarkovChainer 

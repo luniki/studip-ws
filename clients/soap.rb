@@ -10,7 +10,7 @@
 require 'soap/wsdlDriver'
 
 # generate proxy
-WSDL_URL = "http://localhost/~mlunzena/studip_ws_example/public/soap.php?wsdl"
+WSDL_URL = "http://pomona.virtuos.uos.de/~mlunzena/studip_ws/public/soap.php?wsdl"
 soap = SOAP::WSDLDriverFactory.new(WSDL_URL).create_rpc_driver
 
 puts soap.generate_text('secret', 3)

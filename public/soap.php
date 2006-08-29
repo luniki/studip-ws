@@ -17,30 +17,27 @@ $include_path = ini_get('include_path');
 $include_path .= PATH_SEPARATOR . dirname(__FILE__) . '/..';
 ini_set('include_path', $include_path);
 
-
 # requiring nusoap
 require_once 'vendor/nusoap/nusoap.php';
 require_once 'vendor/nusoap/class.delegating_soap_server.php';
 require_once 'vendor/nusoap/class.soap_server_delegate.php';
 
-
 # requiring soap_server_delegate
 require_once 'vendor/studip_ws/studip_ws.php';
 require_once 'vendor/studip_ws/soap_dispatcher.php';
 
-
 # requiring all the webservices
 require_once 'lib/text_generation_web_service.php';
-
 
 $delegate =& new Studip_Ws_SoapDispatcher('TextGenerationWebService');
 $server   =& new DelegatingSoapServer($delegate);
 
-###### creating WSDL ###########################################################
+# creating WSDL
 $namespace = 'urn:studip_wsd';
 $server->configureWSDL('Stud.IP Webservice', $namespace);
 $server->wsdl->schemaTargetNamespace = $namespace;
 
+# register operations
 $delegate->register_operations($server);
 
 # start server
