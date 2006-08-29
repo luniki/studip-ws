@@ -11,6 +11,7 @@
  * the License, or (at your option) any later version.
  */
 
+
 define('STUDIP_WS_TYPE_INT',    'int');
 define('STUDIP_WS_TYPE_STRING', 'string');
 define('STUDIP_WS_TYPE_BASE64', 'base64');
@@ -19,6 +20,7 @@ define('STUDIP_WS_TYPE_FLOAT',  'float');
 define('STUDIP_WS_TYPE_ARRAY',  'array');
 define('STUDIP_WS_TYPE_STRUCT', 'struct');
 define('STUDIP_WS_TYPE_NULL',   'null');
+
 
 /**
  * <ClassDescription>
@@ -30,8 +32,17 @@ define('STUDIP_WS_TYPE_NULL',   'null');
  * @copyright (c) Authors
  * @version   $Id$
  */
+
 class Studip_Ws_Type {
   
+
+  /**
+   * <MethodDescription>
+   *
+   * @param mixed <description>
+   *
+   * @return mixed <description>
+   */
   function translate($type) {
 
     # complex types
@@ -93,16 +104,40 @@ class Studip_Ws_Type {
     
     trigger_error('"' . var_export($type, TRUE) . '" is not a valid type.');
   }
-  
+
+
+  /**
+   * <MethodDescription>
+   *
+   * @param mixed <description>
+   *
+   * @return boolean <description>
+   */  
   function is_complex($type) {
     return is_array($type);
   }
   
+
+  /**
+   * <MethodDescription>
+   *
+   * @param mixed <description>
+   *
+   * @return boolean <description>
+   */  
   function is_array($type) {
     return Studip_Ws_Type::is_complex($type) &&
            key($type) === STUDIP_WS_TYPE_ARRAY;
   }
   
+
+  /**
+   * <MethodDescription>
+   *
+   * @param mixed <description>
+   *
+   * @return boolean <description>
+   */  
   function is_struct($type) {
     return Studip_Ws_Type::is_complex($type) &&
            key($type) === STUDIP_WS_TYPE_STRUCT;

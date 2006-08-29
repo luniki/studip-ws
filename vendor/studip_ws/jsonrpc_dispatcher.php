@@ -22,6 +22,7 @@
  * @copyright (c) Authors
  * @version   $Id$
  */
+
 class Studip_Ws_JsonrpcDispatcher extends Studip_Ws_Dispatcher {
   
 

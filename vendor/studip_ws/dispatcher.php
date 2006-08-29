@@ -11,16 +11,20 @@
  * the License, or (at your option) any later version.
  */
 
+
 /**
  * <ClassDescription>
  *
  * @package   <package>
  * @package   <package>
  *
+ * @abstract
+ *
  * @author    mlunzena
  * @copyright (c) Authors
  * @version   $Id$
  */
+
 class Studip_Ws_Dispatcher {
 
 	
@@ -28,7 +32,7 @@ class Studip_Ws_Dispatcher {
    * <FieldDescription>
    *
    * @access private
-   * @var <type>
+   * @var array
    */
   var $api_methods = array();
   
@@ -121,6 +125,8 @@ class Studip_Ws_Dispatcher {
    * @param mixed <description>
    *
    * @return bool <description>
+   *
+   * @todo Should not this be elsewhere?
    */
   function is_a_service($class) {
     
@@ -146,9 +152,9 @@ class Studip_Ws_Dispatcher {
   /**
    * <MethodDescription>
    *
-   * @param type <description>
+   * @param string <description>
    *
-   * @return type <description>
+   * @return string <description>
    */
   function map_function($function) {
     return $function . '_action';

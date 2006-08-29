@@ -32,8 +32,8 @@ require_once 'lib/text_generation_web_service.php';
 # create server
 $dispatcher =& new Studip_Ws_JsonrpcDispatcher('TextGenerationWebService');
 $server =& new jsonrpc_server($dispatcher->get_dispatch_map(), 0);
-$server->setDebug(3);
-$server->compress_response = FALSE;
+# $server->setDebug(3);
+# $server->compress_response = FALSE;
 
 # start server
 $server->service();

@@ -11,6 +11,7 @@
  * the License, or (at your option) any later version.
  */
 
+
 /**
  * This class is the abstract superclass of all available Stud.IP webservices.
  * You have to extend it when implementing your own webservice.
@@ -27,11 +28,12 @@
 
 class Studip_Ws_Service {
   
+  
   /**
    * <FieldDescription>
    *
    * @access private
-   * @var <type>
+   * @var array
    */
   var $api_methods = array();
 
@@ -46,24 +48,26 @@ class Studip_Ws_Service {
 
 
   /**
-   * This method is called before every other service method.
+   * This method is called before every service method.
    *
-   * @param string the function's name.
-   * @param array an array of arguments that will be delivered to the function.
+   * @param string  the function's name.
+   * @param array   an array of arguments that will be delivered to the function.
    *
-   * @return mixed if this method returns a "TODO_fault" or "FALSE", further
-   *               processing will be aborted and a "TODO_fault" delivered.
+   * @return mixed  if this method returns a "Studip_Ws_Fault" or "FALSE",
+   *                further processing will be aborted and a "Studip_Ws_Fault"
+   *                delivered.
    */
   function before_filter(&$name, &$args) {
   }
 
 
   /**
-   * <MethodDescription>
+   * This method is called after every service method. You may modify the
+   * result of that call. This way you can easily implement filters.
    *
-   * @param string <description>
-   * @param array <description>
-   * @param mixed <description>
+   * @param string  the function's name.
+   * @param array   an array of arguments that were delivered to the function.
+   * @param mixed   the result of the last service method call.
    *
    * @return void
    */
@@ -105,30 +109,5 @@ class Studip_Ws_Service {
    */
   function &get_api_methods() {
     return $this->api_methods;
-  }
-  
-  
-  /**
-   * <MethodDescription>
-   *
-   * @param type <description>
-   *
-   * @return type <description>
-   */
-  function &get_api_method($name) {
-    if (!isset($this->api_methods[$name])) {
-      $null_by_reference = NULL; return $null_by_reference;
-    }
-      
-    return $this->api_methods[$name];
-  }
-  
-  /**
-   * <MethodDescription>
-   *
-   * @return void
-   */
-  function clear_api_methods() {
-    $this->api_methods = array();
   }
 }

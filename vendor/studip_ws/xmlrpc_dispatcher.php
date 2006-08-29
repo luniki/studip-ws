@@ -22,15 +22,16 @@
  * @copyright (c) Authors
  * @version   $Id$
  */
+
 class Studip_Ws_XmlrpcDispatcher extends Studip_Ws_Dispatcher {
   
 
   /**
    * <MethodDescription>
    *
-   * @param type <description>
+   * @param string <description>
    *
-   * @return type <description>
+   * @return mixed <description>
    */
   function dispatch($msg = NULL) {
     
@@ -54,9 +55,9 @@ class Studip_Ws_XmlrpcDispatcher extends Studip_Ws_Dispatcher {
   /**
    * <MethodDescription>
    *
-   * @param type <description>
+   * @param string <description>
    *
-   * @return type <description>
+   * @return mixed <description>
    */
   function throw_exception($message/*, ...*/) {
     $args = func_get_args();
@@ -82,9 +83,9 @@ class Studip_Ws_XmlrpcDispatcher extends Studip_Ws_Dispatcher {
   /**
    * <MethodDescription>
    *
-   * @param type <description>
+   * @param mixed <description>
    *
-   * @return type <description>
+   * @return array <description>
    */
   function map_method($method) {
 
@@ -113,9 +114,9 @@ class Studip_Ws_XmlrpcDispatcher extends Studip_Ws_Dispatcher {
   /**
    * <MethodDescription>
    *
-   * @param type <description>
+   * @param mixed <description>
    *
-   * @return type <description>
+   * @return mixed <description>
    */
   function translate_type($type) {
 

@@ -18,11 +18,15 @@
  * @package   studip
  * @package   ws
  *
+ * @abstract
+ *
  * @author    mlunzena
  * @copyright (c) Authors
  * @version   $Id$
  */
+
 class Studip_Ws_Struct {
+
 
   /**
    * Holds the struct's fields.
@@ -105,42 +109,49 @@ class Studip_Ws_Struct {
  * @copyright (c) Authors
  * @version   $Id$
  */
+
 class Studip_Ws_StructElement {
+
 
   /**
    * <FieldDescription>
    *
    * @access private
-   * @var <type>
+   * @var string
    */
   var $name;
+
   
   /**
    * <FieldDescription>
    *
    * @access private
-   * @var <type>
+   * @var mixed
    */
   var $type;
   
+  
   /**
    * <FieldDescription>
    *
    * @access private
-   * @var <type>
+   * @var array
    */
   var $options;
+
 
 	/**
 	 * <MethodDescription>
 	 *
-	 * @param type <description>
+	 * @param string <description>
+	 * @param mixed  <description>
+	 * @param array  <description>
 	 *
-	 * @return type <description>
+	 * @return void
 	 */
 	function Studip_Ws_StructElement($name, $type, $options = array()) {
-	  $this->name = (string) $name;
-	  $this->type = Studip_Ws_Type::translate($type);
+	  $this->name    = (string) $name;
+	  $this->type    = Studip_Ws_Type::translate($type);
 	  $this->options = 1;
 	}
 }

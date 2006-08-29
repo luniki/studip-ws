@@ -11,6 +11,7 @@
  * the License, or (at your option) any later version.
  */
 
+
 /**
  * <ClassDescription>
  *
@@ -21,6 +22,7 @@
  * @copyright (c) Authors
  * @version   $Id$
  */
+
 class Studip_Ws_Method {
 
   
@@ -91,8 +93,8 @@ class Studip_Ws_Method {
 	  $this->service     =& $service;
 	  $this->name        = $name;
 	  $this->description = (string) $description;
-	  $this->expects = $expects;
-	  $this->returns = $returns;
+	  $this->expects     = $expects;
+	  $this->returns     = $returns;
 
     foreach ($this->expects as $key => $entry)
       $this->expects[$key] = Studip_Ws_Type::translate($entry);

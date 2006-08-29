@@ -12,7 +12,6 @@
  */
 
 
-
 /**
  * <ClassDescription>
  *
@@ -25,6 +24,8 @@
  */
 
 class Studip_Ws_Fault {
+
+
   /**
    * <FieldDescription>
    *

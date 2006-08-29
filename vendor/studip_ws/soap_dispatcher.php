@@ -31,7 +31,7 @@ class Studip_Ws_SoapDispatcher extends Studip_Ws_Dispatcher
    * <FieldDescription>
    *
    * @access private
-   * @var <type>
+   * @var array
    */
   var $types = array();
   
@@ -130,12 +130,13 @@ class Studip_Ws_SoapDispatcher extends Studip_Ws_Dispatcher
     }
   }
 
+
   /**
    * <MethodDescription>
    *
-   * @param type <description>
+   * @param mixed <description>
    *
-   * @return type <description>
+   * @return string <description>
    */
   function type_to_name_wns(&$type) {
     return sprintf('%s:%s',
@@ -147,9 +148,9 @@ class Studip_Ws_SoapDispatcher extends Studip_Ws_Dispatcher
   /**
    * <MethodDescription>
    *
-   * @param type <description>
+   * @param mixed <description>
    *
-   * @return type <description>
+   * @return string <description>
    */
   function type_to_name(&$type) {
     if (Studip_Ws_Type::is_array($type)) {
@@ -187,9 +188,9 @@ class Studip_Ws_SoapDispatcher extends Studip_Ws_Dispatcher
   /**
    * <MethodDescription>
    *
-   * @param type <description>
+   * @param mixed <description>
    *
-   * @return type <description>
+   * @return boolean <description>
    */
   function store_type(&$type) {
     if (isset($this->types[$name = $this->type_to_name_wns($type)]))
@@ -197,15 +198,16 @@ class Studip_Ws_SoapDispatcher extends Studip_Ws_Dispatcher
     if (!Studip_Ws_Type::is_complex($type))
       return FALSE;
     $this->types[$name] =& $type;
+    return TRUE;
   }
 
 
   /**
    * <MethodDescription>
    *
-   * @param type <description>
+   * @param mixed <description>
    *
-   * @return type <description>
+   * @return void
    */
   function store_type_recursive(&$type) {
 
