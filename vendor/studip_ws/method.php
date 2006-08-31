@@ -86,9 +86,10 @@ class Studip_Ws_Method {
     # check $expects
     if (is_null($expects))
       $expects = array();
-    else if (!is_array($expects))
-      trigger_error('Third argument is expected to be an array.',
-                    E_USER_ERROR);
+    else if (!is_array($expects)) {
+      trigger_error('Third argument is expected to be an array.', E_USER_ERROR);
+      exit;
+    }
 
 	  $this->service     =& $service;
 	  $this->name        = $name;

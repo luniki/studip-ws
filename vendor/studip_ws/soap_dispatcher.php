@@ -187,7 +187,8 @@ class Studip_Ws_SoapDispatcher extends Studip_Ws_Dispatcher
     }
     
     trigger_error(sprintf('Type not known: %s', var_export($type, TRUE)),
-                  E_USER_ERROR);    
+                  E_USER_ERROR);
+    exit; 
   }
 
 

@@ -59,9 +59,11 @@ class Studip_Ws_Dispatcher {
 
       foreach ($api_methods as $method_name => $method) {
         
-        if (isset($this->api_methods[$method_name]))
+        if (isset($this->api_methods[$method_name])) {
           trigger_error(sprintf('Method %s already defined', $method_name),
                         E_USER_ERROR);
+          exit;
+        }
 
         $this->api_methods[$method_name] =& $api_methods[$method_name];
       }
@@ -136,6 +138,7 @@ class Studip_Ws_Dispatcher {
       } else {
         trigger_error('Argument has to be a string or an object.', 
                       E_USER_ERROR);
+        exit;
       }
     }
       
