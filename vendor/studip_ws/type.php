@@ -46,7 +46,10 @@ class Studip_Ws_Type {
   function translate($type) {
 
     # complex types
-    if (is_string($type) && class_exists($type))      
+    if (is_string($type) &&
+        class_exists($type) &&
+        Studip_Ws_Struct::is_a_struct($type))
+      
       return array(STUDIP_WS_TYPE_STRUCT => $type);
     
     # array types
@@ -108,7 +111,6 @@ class Studip_Ws_Type {
         return array($replacement => NULL);
     
     trigger_error('"' . var_export($type, TRUE) . '" is not a valid type.');
-    exit;
   }
 
 
@@ -129,7 +131,6 @@ class Studip_Ws_Type {
     trigger_error(sprintf('$type has to be an array, but is: "%s"',
                           var_export($type, TRUE)),
                   E_USER_ERROR);    
-    exit;
   }
 
   
@@ -148,7 +149,6 @@ class Studip_Ws_Type {
     trigger_error(sprintf('\$type has to be an array, but is: "%s"',
                           var_export($type, TRUE)),
                   E_USER_ERROR);    
-    exit;
   }
 
 
