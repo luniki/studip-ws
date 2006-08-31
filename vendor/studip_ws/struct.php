@@ -49,9 +49,11 @@ class Studip_Ws_Struct {
 	function add_element($name, $type, $options = array()) {
 
     # name must not exist
-    if (isset($this->struct_fields[$name]))
+    if (isset($this->struct_fields[$name])) {
       trigger_error(sprintf('Element %s already defined.', $name),
                     E_USER_ERROR);
+      return NULL;
+    }
 
     # TODO options
 

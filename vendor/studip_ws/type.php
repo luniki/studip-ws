@@ -111,6 +111,7 @@ class Studip_Ws_Type {
         return array($replacement => NULL);
     
     trigger_error('"' . var_export($type, TRUE) . '" is not a valid type.');
+    return array(STUDIP_WS_TYPE_NULL => NULL);
   }
 
 
@@ -131,6 +132,7 @@ class Studip_Ws_Type {
     trigger_error(sprintf('$type has to be an array, but is: "%s"',
                           var_export($type, TRUE)),
                   E_USER_ERROR);    
+    return STUDIP_WS_TYPE_NULL;
   }
 
   
@@ -149,6 +151,7 @@ class Studip_Ws_Type {
     trigger_error(sprintf('\$type has to be an array, but is: "%s"',
                           var_export($type, TRUE)),
                   E_USER_ERROR);    
+    return STUDIP_WS_TYPE_NULL;
   }
 
 

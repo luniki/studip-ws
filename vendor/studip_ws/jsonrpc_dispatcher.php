@@ -149,5 +149,6 @@ class Studip_Ws_JsonrpcDispatcher extends Studip_Ws_Dispatcher {
     trigger_error(sprintf('Type %s could not be found.', 
                           var_export($type, TRUE)),
                   E_USER_ERROR);
+    return $GLOBALS['xmlrpcString'];
   }
 }

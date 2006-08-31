@@ -94,8 +94,10 @@ class Studip_Ws_Service {
 #    if (!method_exists($this, $name . '_action'))
 #      trigger_error(sprintf('No such method exists: %s.', $name), E_USER_ERROR);
 
-    if (isset($this->api_methods[$name]))
+    if (isset($this->api_methods[$name])) {
       trigger_error(sprintf('Method %s already added.', $name), E_USER_ERROR);
+      return NULL;
+    }
     
     return $this->api_methods[$name] =&
       new Studip_Ws_Method($this, $name, $expects, $returns, $description);
