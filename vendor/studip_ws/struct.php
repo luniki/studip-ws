@@ -152,6 +152,6 @@ class Studip_Ws_StructElement {
 	function Studip_Ws_StructElement($name, $type, $options = array()) {
 	  $this->name    = (string) $name;
 	  $this->type    = Studip_Ws_Type::translate($type);
-	  $this->options = 1;
+	  $this->options = $options;
 	}
 }

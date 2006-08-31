@@ -54,13 +54,21 @@ class Studip_Ws_Type {
     
     # array types
     if (is_array($type)) {
-      if (!sizeof($type))
-        trigger_error('Array of unknown type.', E_USER_ERROR);
-      if (is_null($array_type = current($type)))
-        trigger_error('Array of unknown type.', E_USER_ERROR);
+      if (!sizeof($type)) {
+        trigger_error('Array of missing type.', E_USER_ERROR);
+        return array(STUDIP_WS_TYPE_NULL => NULL);
+      }
+
+      $element_type = current($type);
+      if (is_null($element_type)) {
+        trigger_error(sprintf('Array of unknown type: %s',
+                              var_export($element_type, TRUE)),
+                      E_USER_ERROR);
+        return array(STUDIP_WS_TYPE_NULL => NULL);
+      }
          
       return array(STUDIP_WS_TYPE_ARRAY =>
-                   Studip_Ws_Type::translate($array_type));
+                   Studip_Ws_Type::translate($element_type));
     }
 
     # basic types
@@ -69,25 +77,25 @@ class Studip_Ws_Type {
       
         case 'int':
         case 'integer':
-                        return STUDIP_WS_TYPE_INT;
+                        return array(STUDIP_WS_TYPE_INT => NULL);
 
         case 'string':
         case 'text':
-                        return STUDIP_WS_TYPE_STRING;
+                        return array(STUDIP_WS_TYPE_STRING => NULL);
 
         case 'base64':
-                        return STUDIP_WS_TYPE_BASE64;
+                        return array(STUDIP_WS_TYPE_BASE64 => NULL);
 
         case 'bool':
         case 'boolean':
-                        return STUDIP_WS_TYPE_BOOL;
+                        return array(STUDIP_WS_TYPE_BOOL => NULL);
 
         case 'float':
         case 'double':
-                        return STUDIP_WS_TYPE_FLOAT;
+                        return array(STUDIP_WS_TYPE_FLOAT => NULL);
 
         case 'null':
-                        return STUDIP_WS_TYPE_NULL;
+                        return array(STUDIP_WS_TYPE_NULL => NULL);
       }
 
     # type by example
@@ -100,7 +108,7 @@ class Studip_Ws_Type {
       );
     foreach ($type_checkers as $function => $replacement)
       if ($function($type))
-        return $replacement;
+        return array($replacement => NULL);
     
     trigger_error('"' . var_export($type, TRUE) . '" is not a valid type.');
   }
@@ -111,35 +119,60 @@ class Studip_Ws_Type {
    *
    * @param mixed <description>
    *
-   * @return boolean <description>
-   */  
-  function is_complex($type) {
-    return is_array($type);
-  }
+   * @return string <description>
+   *
+   * @todo name ist falsch
+   */
+  function get_type($type) {
   
+    if (is_array($type))
+      return key($type);
+    
+    trigger_error(sprintf('$type has to be an array, but is: "%s"',
+                          var_export($type, TRUE)),
+                  E_USER_ERROR);    
+  }
 
+  
   /**
    * <MethodDescription>
    *
    * @param mixed <description>
    *
-   * @return boolean <description>
-   */  
-  function is_array($type) {
-    return Studip_Ws_Type::is_complex($type) &&
-           key($type) === STUDIP_WS_TYPE_ARRAY;
+   * @return mixed <description>
+   *
+   * @todo name ist falsch
+   */
+  function get_element_type($type) {
+    if (is_array($type))
+      return current($type);
+    trigger_error(sprintf('\$type has to be an array, but is: "%s"',
+                          var_export($type, TRUE)),
+                  E_USER_ERROR);    
   }
-  
+
 
   /**
    * <MethodDescription>
    *
-   * @param mixed <description>
+   * @param type <description>
    *
-   * @return boolean <description>
-   */  
-  function is_struct($type) {
-    return Studip_Ws_Type::is_complex($type) &&
-           key($type) === STUDIP_WS_TYPE_STRUCT;
+   * @return type <description>
+   */
+  function is_complex_type($type0) {
+    $type = Studip_Ws_Type::get_type($type0);
+    return $type === STUDIP_WS_TYPE_ARRAY || $type === STUDIP_WS_TYPE_STRUCT;
+  }
+
+
+  /**
+   * <MethodDescription>
+   *
+   * @param type <description>
+   *
+   * @return type <description>
+   */
+  function is_primitive_type($type0) {
+    return !Studip_Ws_Type::is_primitive_type($type0);
   }
 }

@@ -13,7 +13,6 @@
 
 
 require_once 'markov_chainer.php';
-require_once '../test/fixtures/user_struct.php';
 
 /**
  * Text generation service using markov chains.

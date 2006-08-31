@@ -36,14 +36,6 @@ class ServiceTestCase extends UnitTestCase {
   }
 
 
-  function assertArgument(&$sig, $expected_type) {
-    $actual_type = array_shift($sig->expects);
-    $msg = sprintf('Types do not match. Actual: "%s" Expected: "%s"',
-                   var_export($actual_type, TRUE),
-                   var_export($expected_type, TRUE));
-    $this->assertEqual($actual_type, $expected_type, $msg);
-  }
-  
   function assertDescription(&$sig, $expected_description) {
     $actual_description = $sig->description;
     $msg = sprintf('Descriptions do not match. Actual: "%s" Expected: "%s"',
@@ -51,15 +43,43 @@ class ServiceTestCase extends UnitTestCase {
                    var_export($expected_description, TRUE));
     $this->assertEqual($actual_description, $expected_description);
   }
-  
-  function assertReturnValue(&$sig, $expected_return_value) {
-    $actual_return_value = $sig->returns;
-    $msg = sprintf('Types do not match. Actual: "%s" Expected: "%s"',
-                   var_export($actual_return_value, TRUE),
-                   var_export($expected_return_value, TRUE));
-    $this->assertEqual($actual_return_value, $expected_return_value, $msg);
-  }
 
+  function assertArgument(&$sig, $expected_type) {
+
+    # any arguments left?
+    if (sizeof($sig->expects) === 0) {
+      if (is_null($expected_type))
+        $this->pass();
+      else
+        $this->fail('No more arguments.');
+      return;
+    }
+    
+    $actual_type = Studip_Ws_Type::get_type(array_shift($sig->expects));
+
+    $msg = sprintf('Types do not match. Actual: "%s" Expected: "%s"',
+                   var_export($actual_type, TRUE),
+                   var_export($expected_type, TRUE));
+    $r = $this->assertEqual($actual_type, $expected_type, $msg);
+  }
+  
+  function assertReturnValue(&$sig /*, ...*/) {
+
+    $returns = $sig->returns;
+    
+    $args = func_get_args();
+    $args = array_slice($args, 1);
+    
+    do {
+      $actual_type   = Studip_Ws_Type::get_type($returns);
+      $expected_type = current($args);
+      $msg = sprintf('Types do not match. Actual: "%s" Expected: "%s"',
+                     var_export($actual_type, TRUE),
+                     var_export($expected_type, TRUE));
+      $this->assertEqual($actual_type, $expected_type, $msg);
+      $returns = Studip_Ws_Type::get_element_type($returns);
+    } while (!is_null($returns) && next($args) !== FALSE);
+  }
 
 
   function test_api_signatures_description() {
@@ -130,40 +150,37 @@ class ServiceTestCase extends UnitTestCase {
     $this->assertReturnValue($sig, STUDIP_WS_TYPE_NULL);
   }
 
-  function test_api_signatures_array() {
-
-    $exp = array(STUDIP_WS_TYPE_ARRAY => STUDIP_WS_TYPE_INT);
-    $sig = $this->add_api_method(array(), array('int'));
-    $this->assertReturnValue($sig, $exp);
-
-    $arg = array('int');
-    $exp = array(STUDIP_WS_TYPE_ARRAY => STUDIP_WS_TYPE_INT);
-    $sig = $this->add_api_method(array($arg));
-    $this->assertArgument($sig, $exp);
-
-    $arg = array(1);
-    $exp = array(STUDIP_WS_TYPE_ARRAY => STUDIP_WS_TYPE_INT);
-    $sig = $this->add_api_method(array($arg));
-    $this->assertArgument($sig, $exp);
-
+  function test_api_signatures_array_1() {
     $arg = array();
     $sig = $this->add_api_method(array($arg));
     $this->assertError();
+  }
 
+  function test_api_signatures_array_2() {
     $arg = array(NULL);
     $sig = $this->add_api_method(array($arg));
     $this->assertError();
-
-    $arg = array(array(STUDIP_WS_TYPE_INT));
-    $exp = array(STUDIP_WS_TYPE_ARRAY =>
-                 array(STUDIP_WS_TYPE_ARRAY => STUDIP_WS_TYPE_INT));
-    $sig = $this->add_api_method(array($arg));
-    $this->assertArgument($sig, $exp);
   }
+
+  function test_api_signatures_array_() {
+    $sig = $this->add_api_method(array(), array('int'));
+    $this->assertReturnValue($sig, STUDIP_WS_TYPE_ARRAY, STUDIP_WS_TYPE_INT);
+
+    $arg = array('int');
+    $sig = $this->add_api_method(array($arg));
+    $this->assertArgument($sig, STUDIP_WS_TYPE_ARRAY, STUDIP_WS_TYPE_INT);
+
+    $arg = array(1);
+    $sig = $this->add_api_method(array($arg));
+    $this->assertArgument($sig, STUDIP_WS_TYPE_ARRAY, STUDIP_WS_TYPE_INT);
+
+    $arg = array(array('int'));
+    $sig = $this->add_api_method(array($arg));
+    $this->assertArgument($sig, STUDIP_WS_TYPE_ARRAY, STUDIP_WS_TYPE_ARRAY, STUDIP_WS_TYPE_INT);
+ }
 
   function test_api_signatures_struct() {
     $sig = $this->add_api_method(array('UserStruct'));
-    $exp = array(STUDIP_WS_TYPE_STRUCT => 'UserStruct');
-    $this->assertArgument($sig, $exp);
+    $this->assertArgument($sig, STUDIP_WS_TYPE_STRUCT, 'UserStruct');
   }
 }

@@ -157,30 +157,33 @@ class XmlrpcDispatcherTestCase extends UnitTestCase {
     $this->assertReturnValue($sig, $GLOBALS['xmlrpcBoolean']);
   }
 
-  function test_map_service_array() {
-
+  function test_map_service_array_1() {
     $sig = $this->map_api_method(array(), array('int'));
     $this->assertReturnValue($sig, $GLOBALS['xmlrpcArray']);
+  }
 
+  function test_map_service_array_2() {
     $arg = array('int');
     $sig = $this->map_api_method(array($arg));
     $this->assertArgument($sig, $GLOBALS['xmlrpcArray']);
+  }
 
+  function test_map_service_array_3() {
     $arg = array(1);
     $sig = $this->map_api_method(array($arg));
     $this->assertArgument($sig, $GLOBALS['xmlrpcArray']);
+  }
 
+  function test_map_service_array_4() {
     $arg = array();
     $sig = $this->map_api_method(array($arg));
     $this->assertError();
+  }
 
+  function test_map_service_array_5() {
     $arg = array(NULL);
     $sig = $this->map_api_method(array($arg));
     $this->assertError();
-
-    $arg = array(array($GLOBALS['xmlrpcInt']));
-    $sig = $this->map_api_method(array($arg));
-    $this->assertArgument($sig, $GLOBALS['xmlrpcArray']);
   }
 
   function test_map_service_struct() {

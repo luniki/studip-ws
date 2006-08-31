@@ -91,11 +91,14 @@ class Studip_Ws_SoapDispatcher extends Studip_Ws_Dispatcher
       $this->store_type_recursive($this->types[$key]);
 
     # 2nd pass: register types
-    foreach ($this->types as $key => $type) {
+    foreach ($this->types as $type) {
 
-      if (Studip_Ws_Type::is_array($type)) {
+      $type_class = Studip_Ws_Type::get_type($type);
+
+      if ($type_class === STUDIP_WS_TYPE_ARRAY) {
         $name = $this->type_to_name($type);
-        $element_name = $this->type_to_name_wns(current($type));
+        $element_type = Studip_Ws_Type::get_element_type($type);
+        $element_name = $this->type_to_name_wns($element_type);
         $server->wsdl->addComplexType($name,
                                       'complexType',
                                       'array',
@@ -108,7 +111,7 @@ class Studip_Ws_SoapDispatcher extends Studip_Ws_Dispatcher
                                       $element_name);
       }
       
-      else {
+      else if ($type_class === STUDIP_WS_TYPE_STRUCT) {
 
         $name = $this->type_to_name($type);
         $struct =& new $name();
@@ -140,7 +143,7 @@ class Studip_Ws_SoapDispatcher extends Studip_Ws_Dispatcher
    */
   function type_to_name_wns(&$type) {
     return sprintf('%s:%s',
-                   Studip_Ws_Type::is_complex($type) ? 'tns' : 'xsd',
+                   Studip_Ws_Type::is_complex_type($type) ? 'tns' : 'xsd',
                    $this->type_to_name($type));
   }
 
@@ -153,17 +156,20 @@ class Studip_Ws_SoapDispatcher extends Studip_Ws_Dispatcher
    * @return string <description>
    */
   function type_to_name(&$type) {
-    if (Studip_Ws_Type::is_array($type)) {
+
+    $type_class = Studip_Ws_Type::get_type($type);
+
+    if ($type_class === STUDIP_WS_TYPE_ARRAY) {
       for ($name = '', $element_type = $type;
-           Studip_Ws_Type::is_array($element_type);
-           $element_type = current($element_type)) {
+           Studip_Ws_Type::get_type($element_type) === STUDIP_WS_TYPE_ARRAY;
+           $element_type = Studip_Ws_Type::get_element_type($element_type)) {
         $name .= 'Array';
       }
       return $this->type_to_name($element_type) . $name;
     }
     
-    else if (Studip_Ws_Type::is_struct($type)) {
-      return current($type);
+    else if ($type_class === STUDIP_WS_TYPE_STRUCT) {
+      return Studip_Ws_Type::get_element_type($type);
     }
     
     else {
@@ -176,8 +182,8 @@ class Studip_Ws_SoapDispatcher extends Studip_Ws_Dispatcher
         STUDIP_WS_TYPE_FLOAT  => 'double',
         STUDIP_WS_TYPE_NULL   => 'boolean');
       
-      if (isset($mapping[$type]))
-        return $mapping[$type];
+      if (isset($mapping[$type_class]))
+        return $mapping[$type_class];
     }
     
     trigger_error(sprintf('Type not known: %s', var_export($type, TRUE)),
@@ -195,8 +201,10 @@ class Studip_Ws_SoapDispatcher extends Studip_Ws_Dispatcher
   function store_type(&$type) {
     if (isset($this->types[$name = $this->type_to_name_wns($type)]))
       return FALSE;
-    if (!Studip_Ws_Type::is_complex($type))
+    
+    if (Studip_Ws_Type::is_primitive_type($type))
       return FALSE;
+
     $this->types[$name] =& $type;
     return TRUE;
   }
@@ -211,17 +219,17 @@ class Studip_Ws_SoapDispatcher extends Studip_Ws_Dispatcher
    */
   function store_type_recursive(&$type) {
 
-    if (!Studip_Ws_Type::is_complex($type))
-      return;
 
-    if (Studip_Ws_Type::is_array($type)) {
-      $element_type =& current($type);
+    $type_class = Studip_Ws_Type::get_type($type);
+
+    if ($type_class === STUDIP_WS_TYPE_ARRAY) {
+      $element_type =& Studip_Ws_Type::get_element_type($type);
       $this->store_type($element_type);
       $this->store_type_recursive($element_type);
     }
 
-    if (Studip_Ws_Type::is_struct($type)) {
-      $struct_type =& current($type);
+    else if ($type_class === STUDIP_WS_TYPE_STRUCT) {
+      $struct_type =& Studip_Ws_Type::get_element_type($type);
       $struct =& new $struct_type();
       foreach ($struct->get_elements() as $element) {
         if ($this->store_type($element->type))

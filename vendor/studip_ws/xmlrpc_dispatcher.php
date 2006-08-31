@@ -118,42 +118,33 @@ class Studip_Ws_XmlrpcDispatcher extends Studip_Ws_Dispatcher {
    *
    * @return mixed <description>
    */
-  function translate_type($type) {
+  function translate_type($type0) {
 
-    # primitive types
-    if (is_string($type))
+    switch ($type = Studip_Ws_Type::get_type($type0)) {
+      case STUDIP_WS_TYPE_INT:
+                                  return $GLOBALS['xmlrpcInt'];
 
-      switch ($type) {
-        case STUDIP_WS_TYPE_INT:
-                                   return $GLOBALS['xmlrpcInt'];
+      case STUDIP_WS_TYPE_STRING:
+                                  return $GLOBALS['xmlrpcString'];
 
-        case STUDIP_WS_TYPE_STRING:
-                                   return $GLOBALS['xmlrpcString'];
+      case STUDIP_WS_TYPE_BASE64:
+                                  return $GLOBALS['xmlrpcBase64'];
 
-        case STUDIP_WS_TYPE_BASE64:
-                                   return $GLOBALS['xmlrpcBase64'];
+      case STUDIP_WS_TYPE_BOOL:
+                                  return $GLOBALS['xmlrpcBoolean'];
 
-        case STUDIP_WS_TYPE_BOOL:
-                                   return $GLOBALS['xmlrpcBoolean'];
+      case STUDIP_WS_TYPE_FLOAT:
+                                  return $GLOBALS['xmlrpcDouble'];
 
-        case STUDIP_WS_TYPE_FLOAT:
-                                   return $GLOBALS['xmlrpcDouble'];
+      case STUDIP_WS_TYPE_NULL:
+                                  return $GLOBALS['xmlrpcBoolean'];
 
-        case STUDIP_WS_TYPE_NULL:
-                                   return $GLOBALS['xmlrpcBoolean'];
-      }
-    
-    # complex types
-    if (is_array($type))
-    
-      switch (key($type)) {
+      case STUDIP_WS_TYPE_ARRAY:
+                                  return $GLOBALS['xmlrpcArray'];
 
-        case STUDIP_WS_TYPE_ARRAY:
-                                   return $GLOBALS['xmlrpcArray'];
-
-        case STUDIP_WS_TYPE_STRUCT:
-                                   return $GLOBALS['xmlrpcStruct'];
-      }
+      case STUDIP_WS_TYPE_STRUCT:
+                                  return $GLOBALS['xmlrpcStruct'];
+    }
 
     trigger_error(sprintf('Type %s could not be found.', 
                           var_export($type, TRUE)),
