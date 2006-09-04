@@ -85,7 +85,7 @@ class Studip_Ws_Struct {
    *
    * @return array <description>
    */
-  function &get_elements($class = NULL) {
+  function &get_struct_elements($class = NULL) {
 
     static $once;
 

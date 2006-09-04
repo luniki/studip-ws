@@ -114,10 +114,9 @@ class Studip_Ws_SoapDispatcher extends Studip_Ws_Dispatcher
       else if ($type_class === STUDIP_WS_TYPE_STRUCT) {
 
         $name = $this->type_to_name($type);
-        $struct =& new $name();
 
         $elements = array();
-        foreach ($struct->get_elements() as $element) {
+        foreach (Studip_Ws_Type::get_struct_elements($name) as $element) {
           $elements[$element->name] = array(
             'name' => $element->name,
             'type' => $this->type_to_name_wns($element->type));
