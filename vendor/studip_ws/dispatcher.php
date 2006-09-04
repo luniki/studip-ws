@@ -41,17 +41,24 @@ class Studip_Ws_Dispatcher {
    * Constructor. Give an unlimited number of services' class names as
    * arguments.
    *
-   * @param string $services,... an unlimited number of services' class names
+   * @param mixed $services,... an unlimited number or an array of class names
+   *                            of services to include
    *
    * @return void
    */
   function Studip_Ws_Dispatcher($services/*, ... */) {
-    
-    foreach (func_get_args() as $service_name) {
+
+    if (!is_array($services))
+      $services = func_get_args();
+
+    foreach ($services as $service_name) {
       
       # not a service
-      if (!class_exists($service_name) || !$this->is_a_service($service_name))
+      if (!class_exists($service_name) || !$this->is_a_service($service_name)) {
+        trigger_error(sprintf('Service "%s" does not exist.', $service_name),
+                      E_USER_WARNING);        
         continue;
+      }
 
       $service =& new $service_name();
 

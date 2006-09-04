@@ -46,10 +46,7 @@ class Studip_Ws_Type {
   function translate($type) {
 
     # complex types
-    if (is_string($type) &&
-        class_exists($type) &&
-        Studip_Ws_Struct::is_a_struct($type))
-      
+    if (is_string($type) && class_exists($type))      
       return array(STUDIP_WS_TYPE_STRUCT => $type);
     
     # array types
@@ -175,7 +172,42 @@ class Studip_Ws_Type {
    *
    * @return type <description>
    */
-  function is_primitive_type($type0) {
-    return !Studip_Ws_Type::is_primitive_type($type0);
+  function is_primitive_type($type) {
+    return !Studip_Ws_Type::is_complex_type($type);
+  }
+
+  
+  /**
+   * <MethodDescription>
+   *
+   * @param type <description>
+   *
+   * @return type <description>
+   */
+  function get_struct_elements($struct) {
+
+    # check argument; has to be a class
+    if (!class_exists($struct)) {
+      trigger_error(sprintf('Class definition missing: "%s"', $struct),
+                    E_USER_ERROR);
+      return NULL;      
+    }
+
+    $result = array();
+    
+    # either a struct or a duck typing struct (= responds to 'get_elements')
+    if (is_callable(array($struct, 'get_elements'))) {
+      $result = call_user_func(array($struct, 'get_elements'), $struct);
+    }
+    
+    # just a class
+    else {
+      foreach (get_class_vars($struct) as $var_name => $var_value) {
+        $result[] =& new Studip_Ws_StructElement($var_name,
+                                                 STUDIP_WS_TYPE_STRING);
+      }
+    }
+    
+    return $result;
   }
 }

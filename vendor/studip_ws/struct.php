@@ -29,46 +29,14 @@ class Studip_Ws_Struct {
 
 
   /**
-   * Holds the struct's fields.
+   * Class-level constructor. Initialize your struct within using
+   * ClassName::add_element('name', 'type', $options)
    *
-   * @access private
-   * @var array
-   */
-  var $struct_fields = array();
-
-
-	/**
-	 * <MethodDescription>
-	 *
-	 * @param string <description>
-	 * @param mixed <description>
-	 * @param array <description>
-	 *
-	 * @return void
-	 */
-	function add_element($name, $type, $options = array()) {
-
-    # name must not exist
-    if (isset($this->struct_fields[$name])) {
-      trigger_error(sprintf('Element %s already defined.', $name),
-                    E_USER_ERROR);
-      return NULL;
-    }
-
-    # TODO options
-
-    $this->struct_fields[$name] =&
-      new Studip_Ws_StructElement($name, $type, $options);
-	}
-
-
-  /**
-   * <MethodDescription>
+   * @abstract
    *
-   * @return array <description>
+   * @return void
    */
-  function &get_elements() {
-    return $this->struct_fields;
+  function init() {
   }
 
   
@@ -76,27 +44,67 @@ class Studip_Ws_Struct {
    * <MethodDescription>
    *
    * @param string <description>
+   * @param mixed <description>
+   * @param array <description>
    *
-   * @return bool <description>
+   * @return type <description>
    */
-  function is_a_struct($class) {
-    
-    if (!is_string($class)) {
-      if (is_object($class)) {
-        $class = get_class($class);
-      } else {
-        trigger_error('Argument has to be a string or an object.',
-                      E_USER_ERROR);
-      }
-    }
-      
-    if (strcasecmp($class, __CLASS__) === 0)
-      return TRUE;
+  function add_element($name = NULL, $type = NULL, $options = array()) {
 
-    if ($parent = get_parent_class($class))
-      return Studip_Ws_Struct::is_a_struct($parent);
+    # static var setup
+    static $elements;
+    if (is_null($elements))
+      $elements = array();
+
+    # setter functionality
+    if (!is_null($name)) {
+
+
+      # no doublets
+      if (isset($elements[$name])) {
+        trigger_error(sprintf('Element %s already defined.', $name),
+                      E_USER_ERROR);
+        return;
+      }
+      
+      # store it
+      $elements[$name] =& new Studip_Ws_StructElement($name, $type, $options);
+
+      return;
+    }
     
-    return FALSE;
+    # getter functionality
+    return $elements;    
+  }
+
+
+  /**
+   * <MethodDescription>
+   *
+   * @param string <description>
+   *
+   * @return array <description>
+   */
+  function &get_elements($class = NULL) {
+
+    static $once;
+
+    # call 'init' once
+    if (is_null($once)) {
+
+      # guess class name if not given (does not work in PHP5 anymore?!)
+      if (is_null($class)) {
+        $backtrace = debug_backtrace();
+        $class = $backtrace[0]['class'];
+      }
+  	
+      # call "class" constructor
+      call_user_func(array($class, 'init'));
+
+      $once = call_user_func(array($class, 'add_element'));
+    }
+
+    return $once;
   }
 }
 
@@ -142,18 +150,18 @@ class Studip_Ws_StructElement {
   var $options;
 
 
-	/**
-	 * <MethodDescription>
-	 *
-	 * @param string <description>
-	 * @param mixed  <description>
-	 * @param array  <description>
-	 *
-	 * @return void
-	 */
-	function Studip_Ws_StructElement($name, $type, $options = array()) {
-	  $this->name    = (string) $name;
-	  $this->type    = Studip_Ws_Type::translate($type);
-	  $this->options = $options;
-	}
+  /**
+   * <MethodDescription>
+   *
+   * @param string <description>
+   * @param mixed  <description>
+   * @param array  <description>
+   *
+   * @return void
+   */
+  function Studip_Ws_StructElement($name, $type, $options = array()) {
+    $this->name    = (string) $name;
+    $this->type    = Studip_Ws_Type::translate($type);
+    $this->options = $options;
+  }
 }

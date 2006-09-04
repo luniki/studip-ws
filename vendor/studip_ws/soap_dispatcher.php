@@ -230,9 +230,8 @@ class Studip_Ws_SoapDispatcher extends Studip_Ws_Dispatcher
     }
 
     else if ($type_class === STUDIP_WS_TYPE_STRUCT) {
-      $struct_type =& Studip_Ws_Type::get_element_type($type);
-      $struct =& new $struct_type();
-      foreach ($struct->get_elements() as $element) {
+      $struct =& Studip_Ws_Type::get_element_type($type);
+      foreach (Studip_Ws_Type::get_struct_elements($struct) as $element) {
         if ($this->store_type($element->type))
           $this->store_type_recursive($element->type);
       }
