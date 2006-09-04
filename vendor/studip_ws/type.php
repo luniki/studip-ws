@@ -196,8 +196,8 @@ class Studip_Ws_Type {
     $result = array();
     
     # either a struct or a duck typing struct (= responds to 'get_elements')
-    if (is_callable(array($struct, 'get_elements'))) {
-      $result = call_user_func(array($struct, 'get_elements'), $struct);
+    if (is_callable(array($struct, 'get_struct_elements'))) {
+      $result = call_user_func(array($struct, 'get_struct_elements'), $struct);
     }
     
     # just a class
