@@ -22,7 +22,7 @@ class SoapDispatcherTestCase extends UnitTestCase {
 
   function setUp() {
     $this->service    =& new Studip_Ws_Service(NULL);
-    $this->dispatcher =& new Studip_Ws_SoapDispatcher(NULL);
+    $this->dispatcher =& new Studip_Ws_SoapDispatcher(array());
   }
   
   function tearDown() {

@@ -23,7 +23,7 @@ class XmlrpcDispatcherTestCase extends UnitTestCase {
 
   function setUp() {
     $this->service    =& new Studip_Ws_Service(NULL);
-    $this->dispatcher =& new Studip_Ws_XmlrpcDispatcher(NULL);
+    $this->dispatcher =& new Studip_Ws_XmlrpcDispatcher(array());
   }
   
   function tearDown() {
