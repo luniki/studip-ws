@@ -124,6 +124,9 @@ class Studip_Ws_Dispatcher {
     # calling after filter
     $service->after_filter($method0, $argument_array, $result);
 
+    if (is_a($result, 'Studip_Ws_Fault'))
+      return $this->throw_exception($result->get_message());
+
     return $result; 
   }
 

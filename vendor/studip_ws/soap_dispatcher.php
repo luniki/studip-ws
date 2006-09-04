@@ -118,7 +118,8 @@ class Studip_Ws_SoapDispatcher extends Studip_Ws_Dispatcher
         foreach (Studip_Ws_Type::get_struct_elements($name) as $element) {
           $elements[$element->name] = array(
             'name' => $element->name,
-            'type' => $this->type_to_name_wns($element->type));
+            'type'      => $this->type_to_name_wns($element->type),
+            'minOccurs' => 0);
         }
         
         $server->wsdl->addComplexType($name,
