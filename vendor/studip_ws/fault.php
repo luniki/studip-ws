@@ -1,7 +1,7 @@
 <?php
 
 /*
- * fault.php - Abstraction of service faults
+ * fault.php - Abstraction of service's faults
  *
  * Copyright (C) 2006 - Marcus Lunzenauer <mlunzena@uos.de>
  *
@@ -13,10 +13,10 @@
 
 
 /**
- * <ClassDescription>
+ * Abstraction of service's faults
  *
- * @package   studip
- * @package   ws
+ * @package     studip
+ * @subpackage  ws
  *
  * @author    mlunzena
  * @copyright (c) Authors
@@ -27,7 +27,7 @@ class Studip_Ws_Fault {
 
 
   /**
-   * <FieldDescription>
+   * The fault's message.
    *
    * @access private
    * @var string
@@ -38,12 +38,12 @@ class Studip_Ws_Fault {
   /**
    * Constructor.
    *
-   * @param string <description>
+   * @param string the fault's message
    *
-   * @return type <description>
+   * @return void
    */
   function Studip_Ws_Fault($message) {
-    $this->message = $message;
+    $this->message = (string) $message;
   }
 
 

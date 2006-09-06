@@ -24,6 +24,7 @@ ini_set('include_path', $include_path);
 require_once('simpletest/unit_tester.php');
 require_once('simpletest/reporter.php');
 require_once('simpletest/collector.php');
+require_once('simpletest/mock_objects.php');
 
 # collect all tests
 $all =& new GroupTest('All tests');

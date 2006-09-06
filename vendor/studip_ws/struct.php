@@ -1,7 +1,7 @@
 <?php
 
 /*
- * struct.php - <short-description>
+ * struct.php - Abstraction for complex type.
  *
  * Copyright (C) 2006 - Marcus Lunzenauer <mlunzena@uos.de>
  *
@@ -13,10 +13,10 @@
 
 
 /**
- * <ClassDescription>
+ * Abstraction for complex type
  *
- * @package   studip
- * @package   ws
+ * @package     studip
+ * @subpackage  ws
  *
  * @abstract
  *
@@ -42,6 +42,8 @@ class Studip_Ws_Struct {
   
   /**
    * <MethodDescription>
+   *
+   * @access protected
    *
    * @param string <description>
    * @param mixed <description>
@@ -110,10 +112,10 @@ class Studip_Ws_Struct {
 
 
 /**
- * <ClassDescription>
+ * Abstraction for complex type elements.
  *
- * @package   <package>
- * @package   <package>
+ * @package     studip
+ * @subpackage  ws
  *
  * @author    mlunzena
  * @copyright (c) Authors
@@ -124,7 +126,7 @@ class Studip_Ws_StructElement {
 
 
   /**
-   * <FieldDescription>
+   * The name of the element.
    *
    * @access private
    * @var string
@@ -133,7 +135,7 @@ class Studip_Ws_StructElement {
 
   
   /**
-   * <FieldDescription>
+   * The type of the element.
    *
    * @access private
    * @var mixed
@@ -142,7 +144,7 @@ class Studip_Ws_StructElement {
   
   
   /**
-   * <FieldDescription>
+   * Options for the element.
    *
    * @access private
    * @var array
@@ -151,11 +153,11 @@ class Studip_Ws_StructElement {
 
 
   /**
-   * <MethodDescription>
+   * Constructor.
    *
-   * @param string <description>
-   * @param mixed  <description>
-   * @param array  <description>
+   * @param string the name of the element.
+   * @param mixed  the type of the element.
+   * @param array  options for the element.
    *
    * @return void
    */

@@ -16,14 +16,16 @@ require_once 'vendor/studip_ws/xmlrpc_dispatcher.php';
 
 require_once 'vendor/phpxmlrpc/xmlrpc.inc';
 
+require_once 'test/fixtures/user_struct.php';
+
 
 class XmlrpcDispatcherTestCase extends UnitTestCase {
 
   var $service, $dispatcher;
 
   function setUp() {
-    $this->service    =& new Studip_Ws_Service(NULL);
-    $this->dispatcher =& new Studip_Ws_XmlrpcDispatcher(array());
+    $this->service    =& new FooService();
+    $this->dispatcher =& new Studip_Ws_XmlrpcDispatcher('FooService');
   }
   
   function tearDown() {
@@ -34,11 +36,7 @@ class XmlrpcDispatcherTestCase extends UnitTestCase {
 
   function map_api_method($expects, $returns = NULL, $description = NULL) {
     return $this->dispatcher->map_method(
-      $this->service->add_api_method(sprintf('function_in_line_%d',
-                                             next(current(debug_backtrace()))),
-                                     $expects,
-                                     $returns,
-                                     $description));
+      $this->service->add_api_method('test', $expects, $returns, $description));
   }
 
 
@@ -94,18 +92,22 @@ class XmlrpcDispatcherTestCase extends UnitTestCase {
     $this->assertDescription($sig, 'foobar');
   }
 
-  function test_map_service_no_arguments() {
+  function test_map_service_no_arguments_1() {
     $sig = $this->map_api_method(NULL, NULL);
     $this->assertArgument($sig, NULL);
+  }
 
+  function test_map_service_no_arguments_2() {
     $sig = $this->map_api_method(array(), NULL);
     $this->assertArgument($sig, NULL);
   }
 
-  function test_map_service_returning_void() {
+  function test_map_service_returning_void_1() {
     $sig = $this->map_api_method(NULL, NULL);
     $this->assertReturnValue($sig, $GLOBALS['xmlrpcBoolean']);
+  }
 
+  function test_map_service_returning_void_2() {
     $sig = $this->map_api_method(NULL);
     $this->assertReturnValue($sig, $GLOBALS['xmlrpcBoolean']);
   }
@@ -189,5 +191,9 @@ class XmlrpcDispatcherTestCase extends UnitTestCase {
   function test_map_service_struct() {
     $sig = $this->map_api_method(array('UserStruct'));
     $this->assertArgument($sig, $GLOBALS['xmlrpcStruct']);
+  }
+  
+  function test_something() {
+    $this->fail('TODO');
   }
 }

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * method.php - <short-description>
+ * method.php - ADT for methods of services.
  *
  * Copyright (C) 2006 - Marcus Lunzenauer <mlunzena@uos.de>
  *

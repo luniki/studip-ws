@@ -15,8 +15,8 @@
 /**
  * <ClassDescription>
  *
- * @package   <package>
- * @package   <package>
+ * @package     studip
+ * @subpackage  ws
  *
  * @abstract
  *
@@ -46,37 +46,56 @@ class Studip_Ws_Dispatcher {
    *
    * @return void
    */
-  function Studip_Ws_Dispatcher($services/*, ... */) {
+  function Studip_Ws_Dispatcher($services = array() /*, ... */) {
 
     if (!is_array($services))
       $services = func_get_args();
 
     foreach ($services as $service_name) {
-      
-      # not a service
-      if (!class_exists($service_name) || !$this->is_a_service($service_name)) {
-        trigger_error(sprintf('Service "%s" does not exist.', $service_name),
-                      E_USER_WARNING);        
-        continue;
-      }
-
-      $service =& new $service_name();
-
-      $api_methods = $service->get_api_methods();
-
-      foreach ($api_methods as $method_name => $method) {
-        
-        if (isset($this->api_methods[$method_name])) {
-          trigger_error(sprintf('Method %s already defined', $method_name),
-                        E_USER_ERROR);
-          return;
-        }
-
-        $this->api_methods[$method_name] =& $api_methods[$method_name];
-      }
+      $this->add_service($service_name);
     }
   }
 
+
+  /**
+   * <MethodDescription>
+   *
+   * @param string <description>
+   *
+   * @return bool <description>
+   */
+  function add_service($service_name) {
+
+    if (!is_string($service_name)) {
+      trigger_error('Arguments must be strings.', E_USER_WARNING);        
+      return FALSE;
+    }
+    
+    # not a service
+    if (!class_exists($service_name) ||
+        !$this->is_a_service($service_name)) {
+      trigger_error(sprintf('Service "%s" does not exist.', $service_name),
+                    E_USER_WARNING);        
+      return FALSE;
+    }
+
+    $service =& new $service_name();
+
+    $api_methods = $service->get_api_methods();
+
+    foreach ($api_methods as $method_name => $method) {
+      
+      if (isset($this->api_methods[$method_name])) {
+        trigger_error(sprintf('Method %s already defined.', $method_name),
+                      E_USER_ERROR);
+        return FALSE;
+      }
+
+      $this->api_methods[$method_name] =& $api_methods[$method_name];
+    }
+    
+    return TRUE;
+  }
 
   /**
    * This method is called to verify the existence of a mapped function.
@@ -87,7 +106,7 @@ class Studip_Ws_Dispatcher {
    *                 function, FALSE otherwise
    */
   function responds_to($function) {
-    return isset($this->api_methods[$function]);
+    return isset($this->api_methods[(string)$function]);
   }
 
 
@@ -107,38 +126,42 @@ class Studip_Ws_Dispatcher {
       return $this->throw_exception('No service responds to "%s".', $method0);
       
     $service = $this->api_methods[$method0]->service;
-    $method = Studip_Ws_Dispatcher::map_function($method0);
 
     # calling before filter
     $before = $service->before_filter($method0, $argument_array);
+    if ($before === FALSE || is_a($before, 'Studip_Ws_Fault')) {
+      $msg = $before ? $before->get_message() : 'before_filter activated.';
+      $exception = $this->throw_exception($msg);
+      return $exception;
+    }
 
-    # #### TODO ####
-    if ($before === FALSE)
-      return $this->throw_exception('TODO: before_filter');
-    else if (is_a($before, 'Studip_Ws_Fault'))
-      return $this->throw_exception($before->get_message());
+    $method = Studip_Ws_Dispatcher::map_function($method0);
 
     # call actual function
-    $result =& call_user_func_array(array(&$service, $method), $argument_array);
+    $result = call_user_func_array(array(&$service, $method), $argument_array);
     
     # calling after filter
     $service->after_filter($method0, $argument_array, $result);
 
-    if (is_a($result, 'Studip_Ws_Fault'))
-      return $this->throw_exception($result->get_message());
+    if (is_a($result, 'Studip_Ws_Fault')) {
+      $exception = $this->throw_exception($result->get_message());
+      return $exception;
+    }
 
     return $result; 
   }
 
 
   /**
-   * <MethodDescription>
-   *
-   * @param mixed <description>
-   *
-   * @return bool <description>
+   * Replacement for "x instanceof Studip_Ws_Service".
    *
    * @todo Should not this be elsewhere?
+   *
+   * @access private
+   *
+   * @param mixed a string or an object to get checked
+   *
+   * @return bool returns TRUE if the argument was a Studip_Ws_Service
    */
   function is_a_service($class) {
     
@@ -163,7 +186,9 @@ class Studip_Ws_Dispatcher {
 
 
   /**
-   * <MethodDescription>
+   * Maps a RPC operation name to it's real world function name.
+   *
+   * @access private
    *
    * @param string <description>
    *
@@ -171,5 +196,21 @@ class Studip_Ws_Dispatcher {
    */
   function map_function($function) {
     return $function . '_action';
+  }
+  
+  
+  /**
+   * <MethodDescription>
+   *
+   * @access private
+   *
+   * @param type <description>
+   *
+   * @return type <description>
+   */
+  function throw_exception($message/*, ...*/) {
+    $args = func_get_args();
+    trigger_error(vsprintf(array_shift($args), $args), E_USER_ERROR);
+    return NULL;
   }
 }

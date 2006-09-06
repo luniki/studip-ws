@@ -15,8 +15,8 @@
 /**
  * <ClassDescription>
  *
- * @package   studip
- * @package   ws
+ * @package     studip
+ * @subpackage  ws
  *
  * @author    mlunzena
  * @copyright (c) Authors

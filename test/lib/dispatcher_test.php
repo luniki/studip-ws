@@ -14,36 +14,170 @@
 require_once 'vendor/studip_ws/studip_ws.php';
 
 require_once 'test/fixtures/foo_service.php';
+require_once 'test/fixtures/bar_service.php';
 
 
 class DispatcherTestCase extends UnitTestCase {
 
+  var $dispatcher;
+
   function setUp() {
+    $this->dispatcher =& new Studip_Ws_Dispatcher('BarService');
   }
   
   function tearDown() {
+    $this->dispatcher = NULL;
   }
 
-  function test_is_a_service() {
-    $is_not_a_service = Studip_Ws_Dispatcher::is_a_service('foo');
-    $this->assertFalse($is_not_a_service);
+  #
+  function test_missing_arguments() {
 
-    $is_not_a_service = Studip_Ws_Dispatcher::is_a_service(__CLASS__);
-    $this->assertFalse($is_not_a_service);
+    new Studip_Ws_Dispatcher();
+    $this->assertNoErrors();
 
-    $is_not_a_service = Studip_Ws_Dispatcher::is_a_service($this);
-    $this->assertFalse($is_not_a_service);
+    $this->expectError(new PatternExpectation('/Missing argument 1/'));
+    $this->expectError(new PatternExpectation('/Arguments must be strings./'));
+    $this->dispatcher->add_service();
 
-    $is_a_service = Studip_Ws_Dispatcher::is_a_service('Studip_Ws_Service');
-    $this->assertTrue($is_a_service);
 
-    $is_a_service = Studip_Ws_Dispatcher::is_a_service('FooService');
-    $this->assertTrue($is_a_service);
+    new Studip_Ws_Dispatcher(array());
+    $this->assertNoErrors();
 
-    $is_a_service = Studip_Ws_Dispatcher::is_a_service(new Studip_Ws_Service());
-    $this->assertTrue($is_a_service);
+    $this->expectError(new PatternExpectation('/Arguments must be strings./'));
+    $this->dispatcher->add_service(array());
+  }
 
-    $is_a_service = Studip_Ws_Dispatcher::is_a_service(new FooService());
-    $this->assertTrue($is_a_service);
+  #
+  function test_wrong_arguments() {
+
+    $does_not_exist =& new PatternExpectation('/does not exist/');
+
+
+    $this->expectError($does_not_exist);
+    new Studip_Ws_Dispatcher('foo');
+
+    $this->expectError($does_not_exist);
+    $this->dispatcher->add_service('foo');
+
+
+    $this->expectError($does_not_exist);
+    new Studip_Ws_Dispatcher(__CLASS__);
+
+    $this->expectError($does_not_exist);
+    $this->dispatcher->add_service(__CLASS__);
+
+
+    $arguments_must_be_strings =&
+      new PatternExpectation('/Arguments must be strings/');
+
+
+    $this->expectError($arguments_must_be_strings);
+    new Studip_Ws_Dispatcher($this);
+
+    $this->expectError($arguments_must_be_strings);
+    $this->dispatcher->add_service($this);
+
+
+    $this->expectError($arguments_must_be_strings);
+    new Studip_Ws_Dispatcher(new Studip_Ws_Service());
+
+    $this->expectError($arguments_must_be_strings);
+    $this->dispatcher->add_service(new Studip_Ws_Service());
+
+
+    $this->expectError($arguments_must_be_strings);
+    new Studip_Ws_Dispatcher(new FooService());
+
+    $this->expectError($arguments_must_be_strings);
+    $this->dispatcher->add_service(new FooService());
+  }
+
+  #
+  function test_right_arguments() {
+
+    new Studip_Ws_Dispatcher('Studip_Ws_Service');
+    $this->dispatcher->add_service('Studip_Ws_Service');
+    $this->assertNoErrors();
+
+    new Studip_Ws_Dispatcher('FooService');
+    $this->dispatcher->add_service('FooService');
+    $this->assertNoErrors();
+
+    new Studip_Ws_Dispatcher('Studip_Ws_Service', 'FooService');
+    $this->assertNoErrors();
+
+    new Studip_Ws_Dispatcher(array('Studip_Ws_Service', 'FooService'));
+    $this->assertNoErrors();
+
+    new Studip_Ws_Dispatcher('BarService');
+    $this->assertNoErrors();
+  }
+
+  #
+  function test_duplicate_methods() {
+
+    $this->expectError(new PatternExpectation('/Method test already defined/'));
+    new Studip_Ws_Dispatcher('BarService', 'BarService');
+
+    $this->expectError(new PatternExpectation('/Method test already defined/'));
+    $this->dispatcher->add_service('BarService');
+  }
+
+  #
+  function test_responds_to() {
+
+    $responds = $this->dispatcher->responds_to('test');
+    $this->assertTrue($responds);
+
+    $does_not_respond = $this->dispatcher->responds_to('foobar');
+    $this->assertFalse($does_not_respond);
+
+    $this->dispatcher->responds_to(NULL);
+    $this->assertNoErrors();
+
+    $this->dispatcher->responds_to(1);
+    $this->assertNoErrors();
+
+    $this->expectError(new PatternExpectation('/Object to string/'));
+    $this->dispatcher->responds_to($this);
+  }
+  
+  #
+  function test_before_filter() {
+
+    $this->expectError(new PatternExpectation('/before_filter activated/'));
+    $this->dispatcher->invoke('test_before_false', array());
+    
+    $this->expectError(new PatternExpectation('/test_before_fault/'));
+    $this->dispatcher->invoke('test_before_fault', array());
+
+    $echoed = $this->dispatcher->invoke('test_before_change_action',
+                                        array('this arg gets echoed'));
+    $this->assertEqual($echoed, 'this arg gets echoed');
+
+    $echoed = $this->dispatcher->invoke('test_before_change_arg',
+                                        array('this arg will change'));
+    $this->assertEqual($echoed, 'arg changed');
+  }
+
+  #
+  function test_action() {
+
+    $result = $this->dispatcher->invoke('test', array());
+    $this->assertTrue($result);
+    $this->assertNoErrors();
+
+    $this->expectError(new PatternExpectation('/test_fault/'));
+    $result = $this->dispatcher->invoke('test_fault', array());
+  }
+
+  #
+  function test_after_filter() {
+    $echoed = $this->dispatcher->invoke('test_after_change_result',
+                                        array());
+    $this->assertEqual($echoed, 'result changed');
+
+    $this->expectError(new PatternExpectation('/test_after_fault/'));
+    $result = $this->dispatcher->invoke('test_after_fault', array());
   }
 }

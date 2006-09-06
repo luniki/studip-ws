@@ -25,8 +25,8 @@ define('STUDIP_WS_TYPE_NULL',   'null');
 /**
  * <ClassDescription>
  *
- * @package   studip
- * @package   ws
+ * @package     studip
+ * @subpackage  ws
  *
  * @author    mlunzena
  * @copyright (c) Authors
@@ -107,7 +107,7 @@ class Studip_Ws_Type {
       if ($function($type))
         return array($replacement => NULL);
     
-    trigger_error('"' . var_export($type, TRUE) . '" is not a valid type.');
+    trigger_error('"' . gettype($type) . '" is not a valid type.');
     return array(STUDIP_WS_TYPE_NULL => NULL);
   }
 

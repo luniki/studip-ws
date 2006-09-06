@@ -1,7 +1,7 @@
 <?php
 
 /*
- * api_test.php - <short-description>
+ * service_test.php - Testing Studip_Ws_Service
  *
  * Copyright (C) 2006 - Marcus Lunzenauer <mlunzena@uos.de>
  *
@@ -14,6 +14,7 @@
 
 require_once 'vendor/studip_ws/studip_ws.php';
 
+require_once 'test/fixtures/foo_service.php';
 require_once 'test/fixtures/user_struct.php';
 
 
@@ -22,18 +23,16 @@ class ServiceTestCase extends UnitTestCase {
   var $service;
 
   function setUp() {
-    $this->service =& new Studip_Ws_Service();
+    $this->service =& new FooService();
   }
   
   function tearDown() {
+    $this->service = NULL;
   }
 
 
   function add_api_method($expects, $returns = NULL, $description = '') {
-    $name = sprintf('function_in_line_%d',
-                             next(current(debug_backtrace())));
-    return $this->service->add_api_method($name, $expects, $returns,
-                                          $description);
+    return $this->service->add_api_method('test', $expects, $returns, $description);
   }
 
 
@@ -88,17 +87,23 @@ class ServiceTestCase extends UnitTestCase {
     $this->assertDescription($sig, 'foobar');
   }
 
-  function test_api_signatures_no_arguments() {
+  function test_api_signatures_no_arguments_1() {
     $sig = $this->add_api_method(NULL, NULL);
     $this->assertArgument($sig, NULL);
+  }
+
+  function test_api_signatures_no_arguments_2() {
 
     $sig = $this->add_api_method(array(), NULL);
     $this->assertArgument($sig, NULL);
   }
 
-  function test_api_signatures_no_return_value() {
+  function test_api_signatures_no_return_value_1() {
     $sig = $this->add_api_method(NULL, NULL);
     $this->assertReturnValue($sig, STUDIP_WS_TYPE_NULL);
+  }
+
+  function test_api_signatures_no_return_value_2() {
 
     $sig = $this->add_api_method(NULL);
     $this->assertReturnValue($sig, STUDIP_WS_TYPE_NULL);
@@ -163,18 +168,24 @@ class ServiceTestCase extends UnitTestCase {
     $this->assertError();
   }
 
-  function test_api_signatures_array_() {
+  function test_api_signatures_array_3() {
     $sig = $this->add_api_method(array(), array('int'));
     $this->assertReturnValue($sig, STUDIP_WS_TYPE_ARRAY, STUDIP_WS_TYPE_INT);
+  }
 
+  function test_api_signatures_array_4() {
     $arg = array('int');
     $sig = $this->add_api_method(array($arg));
     $this->assertArgument($sig, STUDIP_WS_TYPE_ARRAY, STUDIP_WS_TYPE_INT);
+  }
 
+  function test_api_signatures_array_5() {
     $arg = array(1);
     $sig = $this->add_api_method(array($arg));
     $this->assertArgument($sig, STUDIP_WS_TYPE_ARRAY, STUDIP_WS_TYPE_INT);
+  }
 
+  function test_api_signatures_array_6() {
     $arg = array(array('int'));
     $sig = $this->add_api_method(array($arg));
     $this->assertArgument($sig, STUDIP_WS_TYPE_ARRAY, STUDIP_WS_TYPE_ARRAY, STUDIP_WS_TYPE_INT);

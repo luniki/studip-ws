@@ -16,8 +16,8 @@
  * This class is the abstract superclass of all available Stud.IP webservices.
  * You have to extend it when implementing your own webservice.
  *
- * @package   studip
- * @package   ws
+ * @package     studip
+ * @subpackage  ws
  *
  * @abstract
  *
@@ -36,15 +36,6 @@ class Studip_Ws_Service {
    * @var array
    */
   var $api_methods = array();
-
-
-  /**
-   * Constructor.
-   *
-   * @return void
-   */
-  function Studip_Ws_Service() {
-  }
 
 
   /**
@@ -78,10 +69,12 @@ class Studip_Ws_Service {
   /**
    * <MethodDescription>
    *
-   * @param string <description>
+   * @access protected
+   *
+   * @param string the methods name
    * @param array  <description>
    * @param mixed  <description>
-   * @param string <description>
+   * @param string the description of the method
    *
    * @return void
    */
@@ -89,10 +82,8 @@ class Studip_Ws_Service {
                           $description = NULL) {
 
     # check $name
-
-# TODO
-#    if (!method_exists($this, $name . '_action'))
-#      trigger_error(sprintf('No such method exists: %s.', $name), E_USER_ERROR);
+   if (!method_exists($this, $name . '_action'))
+     trigger_error(sprintf('No such method exists: %s.', $name), E_USER_ERROR);
 
     if (isset($this->api_methods[$name])) {
       trigger_error(sprintf('Method %s already added.', $name), E_USER_ERROR);
@@ -105,9 +96,9 @@ class Studip_Ws_Service {
   
   
   /**
-   * <MethodDescription>
+   * Returns the defined API methods of this service.
    *
-   * @return array <description>
+   * @return array the API methods
    */
   function &get_api_methods() {
     return $this->api_methods;

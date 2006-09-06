@@ -17,8 +17,8 @@ require_once 'markov_chainer.php';
 /**
  * Text generation service using markov chains.
  *
- * @package   studip
- * @package   webservice
+ * @package     studip
+ * @subpackage  ws
  *
  * @author    mlunzena
  * @copyright (c) Authors
@@ -40,7 +40,7 @@ class TextGenerationWebService extends Studip_Ws_Service {
   
 
   # first argument is api-key used to authenticate request
-  function before_filter($name, &$args) {
+  function before_filter(&$name, &$args) {
     $api_key = current($args);
     if ($api_key !== 'secret')
       return new Studip_Ws_Fault('Could not authenticate client.');
@@ -48,7 +48,7 @@ class TextGenerationWebService extends Studip_Ws_Service {
 
 
   # example filter applied to the service's result
-  function after_filter($name, &$args, &$result) {
+  function after_filter(&$name, &$args, &$result) {
     if ($name === 'generate_text')
       $result = strtolower($result);
   }

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * foo_service.php - Testing Services
+ * json_dispatcher_test.php - Testing JSON-RPC dispatcher.
  *
  * Copyright (C) 2006 - Marcus Lunzenauer <mlunzena@uos.de>
  *
@@ -12,7 +12,19 @@
  */
 
 
-class FooService extends Studip_Ws_Service {
-  function test_action() {
+require_once 'vendor/studip_ws/studip_ws.php';
+require_once 'vendor/studip_ws/jsonrpc_dispatcher.php';
+
+
+class JsonrpcDispatcherTestCase extends UnitTestCase {
+
+  function setUp() {
+  }
+  
+  function tearDown() {
+  }
+
+  function test_something() {
+    $this->fail('TODO');
   }
 }
