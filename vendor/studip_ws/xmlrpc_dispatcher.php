@@ -24,7 +24,7 @@
  */
 
 class Studip_Ws_XmlrpcDispatcher extends Studip_Ws_Dispatcher {
-  
+
 
   /**
    * <MethodDescription>
@@ -34,7 +34,7 @@ class Studip_Ws_XmlrpcDispatcher extends Studip_Ws_Dispatcher {
    * @return mixed <description>
    */
   function dispatch($msg = NULL) {
-    
+
     # ensure correct invocation
     if (is_null($msg) || !is_a($msg, 'xmlrpcmsg'))
       return $this->throw_exception('functions_parameters_type must not be '.
@@ -48,9 +48,9 @@ class Studip_Ws_XmlrpcDispatcher extends Studip_Ws_Dispatcher {
 
     # return result
     return new xmlrpcresp(
-      php_xmlrpc_encode($this->invoke($msg->method(), $argument_array))); 
+      php_xmlrpc_encode($this->invoke($msg->method(), $argument_array)));
   }
-  
+
 
   /**
    * <MethodDescription>
@@ -78,8 +78,8 @@ class Studip_Ws_XmlrpcDispatcher extends Studip_Ws_Dispatcher {
       $dispatch_map[$method_name] = $this->map_method($method);
     return $dispatch_map;
   }
-  
-  
+
+
   /**
    * <MethodDescription>
    *
@@ -103,7 +103,7 @@ class Studip_Ws_XmlrpcDispatcher extends Studip_Ws_Dispatcher {
     # arguments
     foreach ($method->expects as $type)
       $signature[0][] = $this->translate_type($type);
-      
+
     ## 3. docstring
     $docstring = $method->description;
 
@@ -116,7 +116,7 @@ class Studip_Ws_XmlrpcDispatcher extends Studip_Ws_Dispatcher {
    *
    * @param mixed <description>
    *
-   * @return mixed <description>
+   * @return string <description>
    */
   function translate_type($type0) {
 
@@ -146,7 +146,7 @@ class Studip_Ws_XmlrpcDispatcher extends Studip_Ws_Dispatcher {
                                   return $GLOBALS['xmlrpcStruct'];
     }
 
-    trigger_error(sprintf('Type %s could not be found.', 
+    trigger_error(sprintf('Type %s could not be found.',
                           var_export($type, TRUE)),
                   E_USER_ERROR);
     return $GLOBALS['xmlrpcString'];
