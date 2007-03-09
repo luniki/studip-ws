@@ -3,7 +3,7 @@
  * Self-documenting extension to the PHP-XMLRPC server
  *
  * @author Gaetano Giunta
- * @version $Id: docxmlrpcs.inc,v 1.4 2006/05/14 18:03:41 ggiunta Exp $
+ * @version $Id: docxmlrpcs.inc,v 1.7 2007/02/22 13:48:55 ggiunta Exp $
  * @copyright (c) 2005 G. Giunta
  *
  * @todo use some AJAX magic to implement xmlrpc calls to test/debug methods
@@ -29,16 +29,19 @@
 		var $default_doclang = 'en';
 		var $supported_langs = array('en');
 		var $supported_doctypes = array('html', 'wsdl');
+		/// relative path to the visual xmlrpc editing dialog
+		var $editorpath = '';
 
 		/**
 		* Override xmlrpc_server service method:
 		*   in case of GET requests show docs about implemented methods;
 		*   in case of POST received by a form, we use the methodCall input value
 		*   as if it had been sent with a tex/xml mimetype
-		* @param string $data    request data to be parsed, null by default
+		* @param string $data request data to be parsed, null by default
+		* @param bool $return_payload when true the payload will be returned but not echoed to screen
 		* @param string $doctype type of documentation to generate: html, wsdl, etc... If empty, use class default
 		*/
-		function service($data=null, $doctype='')
+		function service($data=null, $return_payload=false, $doctype='')
 		{
 			if($_SERVER['REQUEST_METHOD'] != 'POST')
 			{
@@ -49,14 +52,19 @@
 				// language decoding
 				if (isset($_GET['lang']) && in_array(strtolower($_GET['lang']), $this->supported_langs))
 				{
-				    $lang = strtolower($_GET['lang']);
+					$lang = strtolower($_GET['lang']);
 				}
 				else
 				{
-				    $lang = $this->default_doclang;
+					$lang = $this->default_doclang;
 				}
 
-				print generateDocs($this, $doctype, $lang);
+				$docs = generateDocs($this, $doctype, $lang, $this->editorpath);
+				if (!$return_payload)
+				{
+					print $docs;
+				}
+				return $docs;
 			}
 			else
 			{
@@ -67,11 +75,15 @@
 					&& $_SERVER['CONTENT_TYPE'] == 'application/x-www-form-urlencoded'
 					&& isset($_POST['methodCall']))
 				{
-					parent::service($_POST['methodCall']);
+					if (get_magic_quotes_gpc())
+					{
+						$_POST['methodCall'] = stripslashes($_POST['methodCall']);
+					}
+					return parent::service($_POST['methodCall'], $return_payload);
 				}
 				else
 				{
-					parent::service($data);
+					return parent::service($data, $return_payload);
 				}
 			}
 		}
@@ -88,7 +100,7 @@
 	*
 	* @todo add support for i18n of generated user-readable docs (eg html)
 	*/
-	function generateDocs($server, $doctype='html', $lang='en')
+	function generateDocs($server, $doctype='html', $lang='en', $editorpath='')
 	{
 		$payload = '';
 		switch ($doctype)
@@ -103,10 +115,19 @@
 				//foreach ($template['httpheaders'] as $header)
 				//	header($header);
 
-				// method name decoding: is uer seeking info about a single method?
+				// method name decoding: is user seeking info about a single method?
 				if (isset($_GET['methodName']))
 				{
-					$payload .= xmlrpc_smarty($template['docheader'], array('lang' => $lang, 'title' => 'Method '.$_GET['methodName']));
+					$opts = array('lang' => $lang, 'title' => 'Method '.$_GET['methodName']);
+					if ($editorpath != '')
+					{
+						$mstart = xmlrpc_smarty($template['xmlrpcmethodstart'], array('method' => $_GET['methodName']));
+						$mend = xmlrpc_smarty($template['xmlrpcmethodend'], array());
+						$opts['extras'] = xmlrpc_smarty($template['editorheaders'], array('baseurl' => $editorpath, 'methodcallstart' => $mstart, 'methodcallend' => $mend));
+					}
+					else
+						$opts['extras'] = '';
+					$payload .= xmlrpc_smarty($template['docheader'], $opts);
 					if ($server->allow_system_funcs)
 					{
 						$methods = array_merge($server->dmap, $GLOBALS['_xmlrpcs_dmap']);
@@ -142,13 +163,20 @@
 							}
 							$payload .= xmlrpc_smarty($template['sigfooter'], array('outtype' => $out, 'outdesc' => $outdoc, 'method' => $_GET['methodName']));
 						}
-						$payload .= xmlrpc_smarty($template['methodfooter'], array('method' => $_GET['methodName']));
+						if ($editorpath)
+						{
+							$payload .= xmlrpc_smarty($template['methodfooter'], array('method' => $_GET['methodName'], 'extras' => xmlrpc_smarty($template['editorlink'], array())));
+						}
+						else
+						{
+							$payload .= xmlrpc_smarty($template['methodfooter'], array('method' => $_GET['methodName'], 'extras' => ''));
+						}
 					}
 				}
 				else
 				{
 					// complete api info
-					$payload .= xmlrpc_smarty($template['docheader'], array('lang' => $lang, 'title' => 'API Index'));
+					$payload .= xmlrpc_smarty($template['docheader'], array('lang' => $lang, 'title' => 'API Index', 'extras' => ''));
 					$payload .= xmlrpc_smarty($template['apiheader']);
 					foreach($server->dmap as $key => $val)
 					{
@@ -205,7 +233,9 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
 <meta http-equiv="Content-Script-Type" content="text-javascript" />
 <meta name="generator" content="'.$GLOBALS['xmlrpcName'].'" />
-<style>
+<style type="text/css" media="screen">
+/* <![CDATA[ */
+
 /**
  * CSS stylesheet for HTML documentation of xmlrpc methods.
  *   original style copied from XINS project (http://xins.sourceforge.net),
@@ -701,7 +731,9 @@ div.broken_freeze {
 	margin-bottom: 1.5em;
 	padding: 1em;
 }
+/* ]]> */
 </style>
+{$extras}
 <title>{$title}</title>
 </head>
 <body>',
@@ -754,15 +786,49 @@ div.broken_freeze {
 <p>Complete by hand the form below inserting the needed parameters to call this method.<br/>
 For a string param use e.g. <pre>&lt;param&gt;&lt;value&gt;&lt;string&gt;Hello&lt;/string&gt;&lt;/value&gt;&lt;/param&gt;</pre></p>
 <form action="" method="post"><p>
-<textarea name="methodCall" rows="5" cols="80">
+<textarea id="methodCall" name="methodCall" rows="5" cols="80">
 &lt;methodCall&gt;&lt;methodName&gt;{$method}&lt;/methodName&gt;
 &lt;params&gt;
 &lt;/params&gt;
 &lt;/methodCall&gt;
 </textarea><br/>
+{$extras}
 <input type="submit" value="Test"/>
-</p></form>'
-	    ),
+</p></form>',
+
+'editorheaders' => '<script type="text/javascript" src="{$baseurl}xmlrpc_lib.js"></script>
+<!--<script type="text/javascript" src="{$baseurl}jsonrpc_lib.js"></script>-->
+<script type="text/javascript">
+<!--
+function runeditor()
+{
+  //var url = "{$baseurl}visualeditor.php?params={$param_payload}";
+  var url = "{$baseurl}visualeditor.php";
+  //if (document.frmaction.wstype.value == "1")
+  //  url += "&type=jsonrpc";
+  var wnd = window.open(url, "_blank", "width=750, height=400, location=0, resizable=1, menubar=0, scrollbars=1");
+}
+// if javascript version of the lib is found, allow it to send us params
+function buildparams(base64data)
+{
+  if (typeof base64_decode == "function")
+  {
+    if (base64data == "0") // workaround for bug in base64_encode...
+      document.getElementById("methodCall").value = "{$methodcallstart}{$methodcallend}";
+    else
+      document.getElementById("methodCall").value = "{$methodcallstart}"+base64_decode(base64data)+"{$methodcallend}";
+  }
+}
+//-->
+</script>
+',
+
+'editorlink' => '<input type="submit" value="Edit" onclick="runeditor(); return false;"/>',
+
+'xmlrpcmethodstart' => '<methodCall><methodName>{$method}</methodName>\n<params>\n',
+
+'xmlrpcmethodend' => '</params>\n</methodCall>',
+		),
 
 		'wsdl' => array(
 		)
